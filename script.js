@@ -46,10 +46,22 @@ let targets = [], targetKind = "orbit", pointerWave = 0, waveX = 0, waveY = 0, f
 let heartCenterX = 0, heartCenterY = 0, heartRadiusX = 0, heartRadiusY = 0;
 let advanceTimer = 0, resizeTimer = 0, typingTimer = 0, ambientHeartTimer = 0, relationshipTimer = 0, opened = false;
 let photoTimer = 0, photoRun = 0, photoFiles = [], photoOrder = [], photoCursor = 0;
+let heartDissolveAt = 0;
 
 function stopMemoryPhotos(){
   clearTimeout(photoTimer);photoRun++;photoCursor=0;photoOrder.length=0;
   memoryPhotos.replaceChildren();
+}
+
+function dissolveHeart(){
+  if(targetKind!=="heartFinal"||heartDissolveAt)return;
+  heartDissolveAt=performance.now();
+  clearTimeout(photoTimer);photoRun++;
+  memoryPhotos.classList.add("dissolving");
+  setTimeout(()=>{
+    memoryPhotos.replaceChildren();memoryPhotos.classList.remove("dissolving");
+    document.getElementById("stage").classList.remove("heart-final-scene");
+  },2400);
 }
 
 function relationshipDuration(now){
@@ -325,6 +337,7 @@ function setTargets(shape, snap=false) {
 function showScene(index) {
   sceneIndex=Math.max(0,Math.min(index,CONFIG.scenes.length-1));
   const scene=CONFIG.scenes[sceneIndex];
+  heartDissolveAt=0;
   clearInterval(relationshipTimer);relationshipTimer=0;
   continueLetter.hidden=true;continueLetter.disabled=false;continueLetter.classList.remove("visible");
   stopMemoryPhotos();
@@ -466,19 +479,20 @@ function drawRomanticEffects(time){
   ctx.restore();ctx.globalAlpha=1;
 }
 
-function drawHeartAura(time){
+function drawHeartAura(time,fade=0){
   if(targetKind!=="heartFinal")return;
   const pulse=1+.045*Math.pow(Math.max(0,Math.sin(time*.0024)),8);
   const radius=Math.max(heartRadiusX,heartRadiusY)*1.4*pulse;
   const halo=ctx.createRadialGradient(heartCenterX,heartCenterY,heartRadiusX*.16,heartCenterX,heartCenterY,radius);
   halo.addColorStop(0,"rgba(255,30,77,.2)");halo.addColorStop(.58,"rgba(241,30,75,.11)");halo.addColorStop(1,"rgba(241,30,75,0)");
-  ctx.fillStyle=halo;ctx.fillRect(heartCenterX-radius,heartCenterY-radius,radius*2,radius*2);
+  ctx.globalAlpha=1-fade;ctx.fillStyle=halo;ctx.fillRect(heartCenterX-radius,heartCenterY-radius,radius*2,radius*2);ctx.globalAlpha=1;
 }
 
 function draw(time) {
   const dt=Math.min(0.034,Math.max(0.001,(time-(lastTime||time))/1000));lastTime=time;frameCount++;
   ctx.clearRect(0,0,width,height);
-  drawHeartAura(time);
+  const heartFade=heartDissolveAt?Math.min(1,(time-heartDissolveAt)/2200):0;
+  drawHeartAura(time,heartFade);
   for(let i=0;i<stars.length;i++){const s=stars[i];const a=s.a*(.62+.38*Math.sin(time*.001*s.speed+s.phase));ctx.fillStyle=`rgba(235,222,255,${a})`;ctx.beginPath();ctx.arc(s.x,s.y,s.r,0,6.283);ctx.fill();}
   drawMeteors(time,dt);
   drawScenePulse(time);
@@ -529,6 +543,11 @@ function draw(time) {
       targetX=heartCenterX+(targetX-heartCenterX)*heartBeat;
       targetY=heartCenterY+(targetY-heartCenterY)*heartBeat;
     }
+    if(targetKind==="heartFinal"&&heartFade>0){
+      const scatter=heartFade*(18+heartFade*125+(p.r*12));
+      targetX+=Math.cos(p.phase+p.drift)*scatter;
+      targetY+=Math.sin(p.phase+p.drift)*scatter;
+    }
     const stiffness=targetKind==="planet"?34:targetKind==="love"||targetKind==="name"?42:32;
     const damping=2*Math.sqrt(stiffness)*1.04;
     p.vx+=(stiffness*(targetX-p.x)-damping*p.vx)*dt;
@@ -548,7 +567,7 @@ function draw(time) {
     const crispText=textScene||headlineParticle;
     const globePoint=targetKind==="planet"&&p.globe;
     if(globePoint)depthAlpha=.13+.87*Math.max(0,(p.globeDepth+1)*.5);
-    ctx.globalAlpha=globePoint?depthAlpha*(.7+.3*twinkle):(crispText?.98:p.alpha)*twinkle*depthAlpha;
+    ctx.globalAlpha=(globePoint?depthAlpha*(.7+.3*twinkle):(crispText?.98:p.alpha)*twinkle*depthAlpha)*(targetKind==="heartFinal"?1-heartFade:1);
     ctx.fillStyle=targetKind==="heartFinal"?(p.color||"#f52e55"):globePoint?(p.globeDepth>.48?"#fffaff":p.globeDepth>-.18?"#ffc9f0":"#876aab"):p.heart?(p.hue<.68?"#ff9fcf":"#ffd8eb"):headlineParticle?"#ffffff":textScene?(p.hue<.24?"#fff4f9":p.hue<.5?"#ffd0e4":p.hue<.76?"#fff0c9":"#f5edff"):glow;
     ctx.shadowBlur=0;
     const pointSize=targetKind==="heartFinal"?1.55+(p.r*.32):globePoint?(1.1+(p.globeSeed%7)*.12)*(p.globeDepth>.25?1.08:.82):p.heart?1.25+p.hue*.3:textShape?1.35+(p.hue*.28):p.r*(headlineParticle?1.45:p.halo?.7:1)*(crispText?1.12:(.78+.22*twinkle));
@@ -568,7 +587,7 @@ function draw(time) {
 
 
 
-document.getElementById("stage").addEventListener("pointerdown",e=>burst(e.clientX,e.clientY));
+document.getElementById("stage").addEventListener("pointerdown",e=>{if(targetKind==="heartFinal"){dissolveHeart();return;}burst(e.clientX,e.clientY);});
 envelope.addEventListener("click",openLetter);
 continueLetter.addEventListener("click",()=>{
   if(continueLetter.disabled)return;
