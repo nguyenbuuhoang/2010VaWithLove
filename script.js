@@ -55,7 +55,7 @@ function dissolveHeart(){
   memoryPhotos.classList.add("dissolving");
   setTimeout(()=>{
     memoryPhotos.replaceChildren();memoryPhotos.classList.remove("dissolving");
-    document.getElementById("stage").classList.remove("heart-final-scene");
+    heartDissolveAt=0;
   },5200);
 }
 
@@ -430,7 +430,6 @@ function drawPlanet(time) {
 }
 function burst(x,y) {
   waveX=x;waveY=y;pointerWave=performance.now();
-  for(let i=0;i<9;i++){hearts.push({x:x+rand(-25,25),y:y+rand(-20,20),vx:rand(-.45,.45),vy:rand(-1.4,-.55),life:1,phase:rand(0,6)});}
 }
 
 function drawMeteors(time,dt){
@@ -469,13 +468,6 @@ function drawRomanticEffects(time){
   ctx.save();ctx.translate(heartCenterX,heartCenterY);ctx.rotate(rotation);
   ctx.beginPath();ctx.ellipse(0,0,rx,ry,0,0,Math.PI*2);
   ctx.strokeStyle="rgba(255,190,226,.2)";ctx.lineWidth=.8;ctx.stroke();
-  for(let i=0;i<6;i++){
-    const a=time*.00032+i*Math.PI/3,x=Math.cos(a)*rx,y=Math.sin(a)*ry;
-    ctx.globalAlpha=.42+.28*(.5+.5*Math.sin(time*.002+i));
-    ctx.fillStyle=i%2?"#ffb7da":"#ffe4f3";
-    ctx.font=(8+i%3*2)+"px Georgia,serif";ctx.textAlign="center";ctx.textBaseline="middle";
-    ctx.fillText("♥",x,y+Math.sin(time*.002+i)*2);
-  }
   ctx.restore();ctx.globalAlpha=1;
 }
 
@@ -491,7 +483,8 @@ function drawHeartAura(time,fade=0){
 function draw(time) {
   const dt=Math.min(0.034,Math.max(0.001,(time-(lastTime||time))/1000));lastTime=time;frameCount++;
   ctx.clearRect(0,0,width,height);
-  const heartFade=heartDissolveAt?Math.min(1,(time-heartDissolveAt)/5000):0;
+  const dissolveProgress=heartDissolveAt?Math.min(1,(time-heartDissolveAt)/5000):0;
+  const heartFade=dissolveProgress<.5?dissolveProgress*2:(1-dissolveProgress)*2;
   drawHeartAura(time,heartFade);
   for(let i=0;i<stars.length;i++){const s=stars[i];const a=s.a*(.62+.38*Math.sin(time*.001*s.speed+s.phase));ctx.fillStyle=`rgba(235,222,255,${a})`;ctx.beginPath();ctx.arc(s.x,s.y,s.r,0,6.283);ctx.fill();}
   drawMeteors(time,dt);
