@@ -48,6 +48,33 @@
 .letter-scene .message-body,.letter-scene .signoff{opacity:1;transform:none}
 @media(max-width:560px){.envelope{width:82vw;height:44vw;min-height:150px}.envelope-caption{font-size:11px}}
 
+/* A vivid, cinematic envelope scene inspired by the supplied reference. */
+.stage.envelope-scene{background:radial-gradient(ellipse at 50% 51%,rgba(196,28,112,.25),transparent 43%),radial-gradient(ellipse at 50% 48%,#21091b 0,#100914 58%,#07070d 100%)}
+.envelope{width:min(62vw,340px);height:min(42vw,220px);min-height:170px;overflow:visible;filter:drop-shadow(0 18px 45px rgba(0,0,0,.38)) drop-shadow(0 0 26px rgba(240,48,145,.24))}
+.envelope::before,.envelope::after{position:absolute;left:50%;width:max-content;max-width:92vw;text-align:center;pointer-events:none;white-space:nowrap;font-family:"Be Vietnam Pro",system-ui,sans-serif;font-weight:700;line-height:1.2;color:#ffa7d2;text-shadow:0 0 25px rgba(255,92,176,.45);filter:blur(3.4px);opacity:.31}
+.envelope::before{content:"Anh yêu em";top:-51%;transform:translateX(-50%);font-size:clamp(31px,8vw,64px);letter-spacing:-.04em;animation:envelope-word-drift 7s ease-in-out infinite}
+.envelope::after{content:"20/10  ·  Mừng ngày của em";bottom:-58%;transform:translateX(-50%) rotate(-4deg);font-family:"Playfair Display",Georgia,serif;font-size:clamp(22px,5.8vw,44px);font-style:italic;letter-spacing:.01em;animation:envelope-word-drift 9s ease-in-out -3s infinite}
+@keyframes envelope-word-drift{0%,100%{translate:-50% 0}50%{translate:-50% -7px}}
+.envelope-back{inset:43% 0 0;border:1px solid rgba(255,150,202,.38);border-radius:7px;background:linear-gradient(145deg,#ed4a9b 0%,#c51d79 52%,#9e155e 100%);box-shadow:inset 0 1px 0 rgba(255,255,255,.2),0 10px 35px rgba(205,26,117,.28)}
+.envelope-paper{left:7%;right:7%;top:18%;bottom:48%;border-radius:3px;background:repeating-linear-gradient(to bottom,#fffafd 0 9px,#f5e8ef 10px,#fffafd 12px);box-shadow:0 5px 20px rgba(255,239,248,.24);z-index:2}
+.envelope-flap{inset:auto 0 auto;top:0;height:49%;border-radius:0;background:linear-gradient(160deg,#ff78b8,#e34496 70%,#d62f88);clip-path:polygon(50% 0,100% 100%,0 100%);transform-origin:50% 100%;z-index:3;filter:drop-shadow(0 2px 5px rgba(255,87,166,.2))}
+.envelope-heart{top:69%;font-size:0;opacity:0}
+.envelope-caption{left:50%;right:auto;bottom:-17%;transform:translateX(-50%);width:max-content;color:#fff2fa;font-size:11px;letter-spacing:.14em;text-shadow:0 2px 12px rgba(0,0,0,.8);z-index:5}
+.envelope-caption span{color:#ff9bc9;padding:0 6px}
+.envelope.opened .envelope-flap{transform:rotateX(180deg) translateY(-16%)}
+@media(max-width:560px){.envelope{width:min(66vw,290px);height:190px;min-height:190px}.envelope::before{top:-44%;font-size:clamp(31px,9vw,48px)}.envelope::after{bottom:-51%;font-size:clamp(22px,6vw,32px)}.envelope-caption{font-size:10px;bottom:-15%}}
+
+/* Elegant handwritten letter typography with a warm, modern paper finish. */
+.letter-scene .letter-card{position:relative;overflow:hidden;border:1px solid rgba(209,169,121,.78);border-radius:18px;background:radial-gradient(ellipse at 8% 4%,rgba(255,255,255,.95),transparent 44%),linear-gradient(145deg,#fffdf8 0%,#fff8ed 56%,#f8e8e7 100%);box-shadow:0 28px 90px rgba(0,0,0,.4),0 0 45px rgba(255,177,204,.16),inset 0 1px 0 #fff}
+.letter-scene .letter-card::before{content:"";position:absolute;inset:11px;border:1px solid rgba(191,145,104,.25);border-radius:11px;pointer-events:none}
+.letter-scene .letter-card::after{content:"♡";position:absolute;right:25px;top:19px;color:#c8848a;font-family:"Playfair Display",serif;font-size:21px;opacity:.75;pointer-events:none}
+.letter-scene .letter-top{position:relative;text-align:center;padding:0 34px 14px;border-bottom:1px solid rgba(173,130,100,.25);margin:0 0 17px;color:#a4775c;font-size:10px;letter-spacing:.28em}
+.letter-scene .letter-top span{float:none;display:inline-block;margin-left:8px;color:#c87889;font-size:15px}
+.letter-scene .message h1{font-family:"Dancing Script","Playfair Display",cursive;font-size:clamp(38px,8vw,52px);font-weight:700;line-height:1.08;letter-spacing:0;color:#72465c;text-shadow:0 1px 0 rgba(255,255,255,.75)}
+.letter-scene .message-body{font-family:"Dancing Script","Be Vietnam Pro",cursive;font-size:clamp(19px,4.7vw,24px);font-weight:600;line-height:1.52;letter-spacing:.005em;color:#59434b;text-align:left;margin-top:14px}
+.letter-scene .signoff{font-family:"Dancing Script","Playfair Display",cursive;font-size:clamp(27px,6vw,34px);font-weight:700;font-style:normal;color:#ad5878;margin-top:14px}
+@media(max-width:560px){.letter-scene .letter-card{padding:24px 22px;border-radius:16px}.letter-scene .letter-card::before{inset:8px;border-radius:11px}.letter-scene .letter-card::after{right:19px;top:15px}.letter-scene .letter-top{padding-bottom:11px;margin-bottom:12px}.letter-scene .message h1{font-size:clamp(37px,10vw,44px)}.letter-scene .message-body{font-size:clamp(19px,5.3vw,22px);line-height:1.48;margin-top:10px}.letter-scene .signoff{font-size:29px;margin-top:11px}}
+
 /* Clearer, calmer type and letter composition */
 .message{width:min(92vw,680px);text-shadow:0 2px 18px rgba(8,5,20,.6)}
 .message h1{font-family:"Be Vietnam Pro",system-ui,sans-serif;font-weight:600;letter-spacing:-.035em;line-height:1.2;text-wrap:balance}
@@ -66,3 +93,27 @@
 .stage{background:radial-gradient(ellipse at 50% 48%,#161126 0,#0a0914 48%,#05050a 100%)}
 .vignette{background:radial-gradient(ellipse at center,transparent 40%,rgba(2,2,8,.28) 80%,rgba(2,2,8,.72) 130%)}
 .stage{background:radial-gradient(ellipse at 50% 52%,rgba(177,123,220,.11),transparent 39%),radial-gradient(ellipse at 18% 76%,rgba(52,92,165,.11),transparent 34%),radial-gradient(ellipse at 84% 24%,rgba(174,83,151,.09),transparent 32%),linear-gradient(145deg,#070711,#100c1d 52%,#060610)}
+
+/* Handwriting uses Windows fonts already installed, so it works without a network font request. */
+.letter-scene .message h1,
+.letter-scene .signoff{font-family:"Segoe Script","Segoe Print","Comic Sans MS",cursive}
+.letter-scene .message-body{font-family:"Segoe Print","Segoe Script","Comic Sans MS",cursive}
+
+/* Small, low-contrast love notes decorate the paper without competing with the letter. */
+.letter-scene .letter-doodles{position:absolute;inset:0;z-index:0;overflow:hidden;pointer-events:none;color:#bd7892;font-family:"Segoe UI Symbol","Segoe UI Emoji",sans-serif}
+.letter-scene .letter-doodles span{position:absolute;display:block;line-height:1;text-shadow:0 1px 8px rgba(173,94,125,.12);user-select:none}
+.letter-scene .doodle-flower{font-size:20px;color:#bd8b6c;opacity:.47}
+.letter-scene .flower-a{left:7%;top:25%;transform:rotate(-14deg)}
+.letter-scene .flower-b{right:7%;bottom:12%;font-size:24px;transform:rotate(12deg)}
+.letter-scene .doodle-heart{font-size:20px;color:#c87591;opacity:.46}
+.letter-scene .heart-a{right:8%;top:37%;transform:rotate(13deg)}
+.letter-scene .heart-b{left:9%;bottom:11%;font-size:13px;transform:rotate(-12deg)}
+.letter-scene .doodle-spark{font-size:19px;color:#bd9665;opacity:.52}
+.letter-scene .spark-a{left:12%;bottom:25%}
+.letter-scene .spark-b{right:13%;top:18%;font-size:15px}
+.letter-scene .doodle-heart.watermark{right:5%;bottom:25%;font-size:76px;opacity:.055;transform:rotate(-13deg)}
+.letter-scene .letter-card>.letter-top,
+.letter-scene .letter-card>h1,
+.letter-scene .letter-card>.message-body,
+.letter-scene .letter-card>.signoff{position:relative;z-index:1}
+@media(max-width:560px){.letter-scene .doodle-flower{font-size:16px}.letter-scene .flower-b{font-size:19px}.letter-scene .doodle-heart.watermark{font-size:60px}}

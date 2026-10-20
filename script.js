@@ -7,15 +7,15 @@ const CONFIG = {
   maxDpr: 1.35,
   autoAdvanceMs: 7200,
   scenes: [
-    { title: "", shape: "planet", duration: 7200 },
-    { title: "", shape: "particleText", lines: ["3"], fontScale: .18, duration: 1250 },
-    { title: "", shape: "particleText", lines: ["2"], fontScale: .18, duration: 1050 },
-    { title: "", shape: "particleText", lines: ["1"], fontScale: .18, duration: 1050 },
-    { title: "", shape: "particleText", lines: ["20/10"], fontScale: .145, duration: 2300 },
-    { title: "", shape: "particleText", lines: ["Mừng ngày của em"], fontScale: .085, duration: 2600 },
-    { title: "", shape: "particleText", lines: ["Anh muốn nói là…"], fontScale: .078, duration: 2600 },
-    { eyebrow: "", title: "Anh yêu em", body: "", signoff: "", shape: "love", duration: 2900 },
-    { eyebrow: "", title: "Lê Nguyễn Thanh\nVân Anh", body: "", signoff: "", shape: "name", duration: 3900 },
+    { title: "", shape: "planet", duration: 9000 },
+    { title: "", shape: "particleText", lines: ["3"], fontScale: .18, duration: 1800 },
+    { title: "", shape: "particleText", lines: ["2"], fontScale: .18, duration: 1700 },
+    { title: "", shape: "particleText", lines: ["1"], fontScale: .18, duration: 1700 },
+    { title: "", shape: "particleText", lines: ["20/10"], fontScale: .145, duration: 3200 },
+    { title: "", shape: "particleText", lines: ["Mừng ngày của em"], fontScale: .085, duration: 3600 },
+    { title: "", shape: "particleText", lines: ["Anh muốn nói là…"], fontScale: .078, duration: 3600 },
+    { eyebrow: "", title: "Anh yêu em", body: "", signoff: "", shape: "love", duration: 4200 },
+    { eyebrow: "", title: "Lê Nguyễn Thanh\nVân Anh", body: "", signoff: "", shape: "name", duration: 5200 },
     { eyebrow: "", title: "", body: "", signoff: "", shape: "envelope" },
     { eyebrow: "", title: "Chúc mừng 20/10", body: "Vân Anh yêu dấu,\n\nChúc em một ngày 20/10 thật hạnh phúc.\nMong em luôn rạng rỡ, bình yên,\nvà được yêu thương thật nhiều —\nhôm nay và mỗi ngày sau đó.\n\nCảm ơn em vì đã làm thế giới của anh\nấm áp và đẹp hơn.", signoff: "Anh yêu em ❤️", shape: "letter" }
   ]
@@ -36,9 +36,11 @@ const rand = (min, max) => min + Math.random() * (max - min);
 const particles = [];
 const stars = [];
 const hearts = [];
+const meteors = [];
 let width = 0, height = 0, dpr = 1, sceneIndex = 0, sceneStarted = 0, lastTime = 0;
 let targets = [], targetKind = "orbit", pointerWave = 0, waveX = 0, waveY = 0, frameCount = 0;
-let advanceTimer = 0, resizeTimer = 0, typingTimer = 0, opened = false;
+let heartCenterX = 0, heartCenterY = 0, heartRadiusX = 0, heartRadiusY = 0;
+let advanceTimer = 0, resizeTimer = 0, typingTimer = 0, ambientHeartTimer = 0, opened = false;
 
 function resize() {
   const w = window.innerWidth, h = window.innerHeight;
@@ -56,6 +58,8 @@ function seedStars() {
   stars.length = 0;
   const count = Math.min(150, Math.max(55, Math.round(width * height / 8500)));
   for (let i = 0; i < count; i++) stars.push({ x: rand(0,width), y: rand(0,height), r: rand(.35,1.25), a: rand(.12,.6), phase: rand(0,Math.PI*2), speed: rand(.3,1.3) });
+  meteors.length=0;
+  for(let i=0;i<3;i++)meteors.push({x:0,y:0,vx:0,vy:0,life:0,duration:0,nextAt:performance.now()+rand(1200,6500)});
 }
 
 function ensureParticles(count) {
@@ -123,10 +127,16 @@ function makeTargets(shape,targetCount) {
   } else if(shape === "love" || shape === "name") {
     const lines=shape==="love"?["Anh yêu em"]:["Lê Nguyễn Thanh","Vân Anh"];
     const text=textTargets(lines,{size:shape==="love"?Math.min(width*.125,66):Math.min(width*.088,46),width:.91});
-    const textLift=height*(shape==="love"?.2:.22);
+    let textBottom=height*.5;
+    for(let i=0;i<text.length;i++)textBottom=Math.max(textBottom,text[i].y);
+    let textLift=height*(shape==="love"?.08:.1);
+    const heartScale=Math.min(width,height)*.13,heartHalf=heartScale*.9;
+    const gap=Math.max(12,Math.min(width,height)*.035);
+    textLift+=Math.max(0,textBottom-textLift+gap+heartHalf*2-height*.88);
     for(let i=0;i<text.length;i++)text[i].y-=textLift;
     pts=text;
-    pts.push(...heartTargets(cx,height*.7,Math.min(width,height)*.14,260,3));
+    const heartY=textBottom-textLift+gap+heartHalf;
+    pts.push(...heartTargets(cx,heartY,heartScale,260,3));
   } else if(shape === "letter") {
     // Particle envelope outline and a heart seal frame the readable letter.
     const w=Math.min(width*.74,410),h=Math.min(height*.38,250),top=cy-h*.24;
@@ -236,6 +246,12 @@ function setTargets(shape, snap=false) {
   targetKind=shape; targets=makeTargets(shape,count);
   if(shape==="particleText"&&targets.length<count)count=targets.length;
   else count=Math.max(count,targets.length);
+  heartCenterX=width*.5;heartCenterY=height*.5;heartRadiusX=heartRadiusY=0;
+  if(shape==="love"||shape==="name"){
+    let left=Infinity,right=-Infinity,top=Infinity,bottom=-Infinity;
+    for(let i=0;i<targets.length;i++)if(targets[i].heart){const t=targets[i];left=Math.min(left,t.x);right=Math.max(right,t.x);top=Math.min(top,t.y);bottom=Math.max(bottom,t.y);}
+    if(left<Infinity){heartCenterX=(left+right)*.5;heartCenterY=(top+bottom)*.5;heartRadiusX=(right-left)*.5;heartRadiusY=(bottom-top)*.5;}
+  }
   ensureParticles(count);
   const len=targets.length;
   for(let i=0;i<particles.length;i++){
@@ -261,7 +277,7 @@ function showScene(index) {
   setTargets(scene.shape);
   sceneStarted=performance.now();
   clearTimeout(advanceTimer);
-  if(scene.shape==="envelope") return;
+  if(scene.shape==="envelope"){ambientHeartTimer=performance.now()+160;return;}
   if(scene.shape!=="planet"&&scene.shape!=="particleText")requestAnimationFrame(()=>titleEl.classList.add("visible"));
   if(scene.shape!=="envelope"&&scene.shape!=="letter"&&sceneIndex<CONFIG.scenes.length-2){
     advanceTimer=setTimeout(()=>showScene(sceneIndex+1),scene.duration||CONFIG.autoAdvanceMs);
@@ -280,7 +296,7 @@ function openLetter(){
   const typeNext=()=>{
     if(i>=finalScene.body.length){signoffEl.textContent=finalScene.signoff;return;}
     bodyEl.textContent=finalScene.body.slice(0,++i);
-    typingTimer=setTimeout(typeNext,finalScene.body[i-1]==="\n"?210:34);
+    typingTimer=setTimeout(typeNext,finalScene.body[i-1]==="\n"?320:48);
   };
   setTimeout(typeNext,1000);
 }
@@ -329,10 +345,58 @@ function burst(x,y) {
   for(let i=0;i<9;i++){hearts.push({x:x+rand(-25,25),y:y+rand(-20,20),vx:rand(-.45,.45),vy:rand(-1.4,-.55),life:1,phase:rand(0,6)});}
 }
 
+function drawMeteors(time,dt){
+  for(let i=0;i<meteors.length;i++){
+    const m=meteors[i];
+    if(m.life<=0&&time>=m.nextAt){
+      m.x=rand(width*.2,width*1.05);m.y=rand(-height*.08,height*.38);
+      m.vx=-rand(105,190);m.vy=rand(65,125);m.duration=rand(1,1.45);m.life=m.duration;
+    }
+    if(m.life<=0)continue;
+    m.x+=m.vx*dt;m.y+=m.vy*dt;m.life-=dt;
+    const alpha=Math.sin(Math.max(0,m.life/m.duration)*Math.PI)*.72;
+    ctx.globalAlpha=alpha;ctx.strokeStyle="#ffe8fa";ctx.lineWidth=1.2;
+    ctx.shadowBlur=8;ctx.shadowColor="#ffaad9";
+    ctx.beginPath();ctx.moveTo(m.x,m.y);ctx.lineTo(m.x-m.vx*.13,m.y-m.vy*.13);ctx.stroke();
+    if(m.life<=0)m.nextAt=time+rand(2200,5600);
+  }
+  ctx.globalAlpha=1;ctx.shadowBlur=0;
+}
+
+function drawScenePulse(time){
+  const age=(time-sceneStarted)/1000;
+  for(let ring=0;ring<2;ring++){
+    const progress=(age-ring*.22)/.9;
+    if(progress<0||progress>1)continue;
+    const radius=Math.min(width,height)*(.035+progress*.34);
+    ctx.globalAlpha=(1-progress)*.22;ctx.strokeStyle="#f7c2ff";ctx.lineWidth=1.1;
+    ctx.beginPath();ctx.arc(width*.5,height*.5,radius,0,Math.PI*2);ctx.stroke();
+  }
+  ctx.globalAlpha=1;
+}
+
+function drawRomanticEffects(time){
+  if(targetKind!=="love"&&targetKind!=="name")return;
+  const rotation=time*.00016,rx=heartRadiusX*1.48,ry=heartRadiusY*1.55;
+  ctx.save();ctx.translate(heartCenterX,heartCenterY);ctx.rotate(rotation);
+  ctx.beginPath();ctx.ellipse(0,0,rx,ry,0,0,Math.PI*2);
+  ctx.strokeStyle="rgba(255,190,226,.2)";ctx.lineWidth=.8;ctx.stroke();
+  for(let i=0;i<6;i++){
+    const a=time*.00032+i*Math.PI/3,x=Math.cos(a)*rx,y=Math.sin(a)*ry;
+    ctx.globalAlpha=.42+.28*(.5+.5*Math.sin(time*.002+i));
+    ctx.fillStyle=i%2?"#ffb7da":"#ffe4f3";
+    ctx.font=(8+i%3*2)+"px Georgia,serif";ctx.textAlign="center";ctx.textBaseline="middle";
+    ctx.fillText("♥",x,y+Math.sin(time*.002+i)*2);
+  }
+  ctx.restore();ctx.globalAlpha=1;
+}
+
 function draw(time) {
   const dt=Math.min(0.034,Math.max(0.001,(time-(lastTime||time))/1000));lastTime=time;frameCount++;
   ctx.clearRect(0,0,width,height);
   for(let i=0;i<stars.length;i++){const s=stars[i];const a=s.a*(.62+.38*Math.sin(time*.001*s.speed+s.phase));ctx.fillStyle=`rgba(235,222,255,${a})`;ctx.beginPath();ctx.arc(s.x,s.y,s.r,0,6.283);ctx.fill();}
+  drawMeteors(time,dt);
+  drawScenePulse(time);
   // Subtle connector lines appear among neighboring forming particles.
   if(targetKind!=="letter"&&targetKind!=="envelope"&&particles.length<1250){
     const maxD=width<600?19:25, maxD2=maxD*maxD;
@@ -344,6 +408,7 @@ function draw(time) {
   if(waveOn){ctx.beginPath();ctx.arc(waveX,waveY,waveR,0,6.283);ctx.strokeStyle=`rgba(255,208,237,${(1-waveAge/1.15)*.33})`;ctx.lineWidth=1.5;ctx.shadowBlur=12;ctx.shadowColor=CONFIG.colors.pink;ctx.stroke();ctx.shadowBlur=0;}
   const orbiting=targetKind==="planet"||targetKind==="orbit"||targetKind==="final"||targetKind==="words"||targetKind==="love"||targetKind==="name";
   if(targetKind==="planet")drawPlanet(time);
+  const transitionAge=(time-sceneStarted)/1000;
   for(let i=0;i<particles.length;i++){
     const p=particles[i];const phase=time*.001*p.speed+p.phase;
     let ox=0,oy=0;
@@ -363,10 +428,10 @@ function draw(time) {
     }
     // One time-based spring keeps motion consistent across 30/60/120 Hz screens.
     const textShape=targetKind==="love"||targetKind==="name"||targetKind==="particleText";
-    const heartBeat=1+.075*Math.pow(Math.max(0,Math.sin(time*.0042)),5)+.018*Math.sin(time*.0021);
+    const heartBeat=1+.17*Math.pow(Math.max(0,Math.sin(time*.0031)),8)+.025*Math.sin(time*.00155);
     if(textShape){
-      ox+=Math.sin(time*.00048)*1.15;
-      oy+=Math.cos(time*.00042)*.9;
+      ox+=Math.sin(time*.00036)*1.4+Math.sin(time*.00105+p.drift)*.72;
+      oy+=Math.cos(time*.00032)*1.1+Math.cos(time*.00088+p.drift)*.62;
     } else {
       const wobble=targetKind==="planet"?.32:.45;
       ox+=Math.sin(time*.00042+p.drift*.12)*wobble;
@@ -375,15 +440,20 @@ function draw(time) {
     if(waveOn){const dx=p.x-waveX,dy=p.y-waveY,dist=Math.hypot(dx,dy)||1,err=dist-waveR;if(Math.abs(err)<27){const push=(1-Math.abs(err)/27)*12;ox+=dx/dist*push;oy+=dy/dist*push;}}
     let targetX=p.tx+ox,targetY=p.ty+oy;
     if(textShape&&p.heart){
-      const cx=width*.5,cy=height*.51;
-      targetX=cx+(targetX-cx)*heartBeat;
-      targetY=cy+(targetY-cy)*heartBeat;
+      targetX=heartCenterX+(targetX-heartCenterX)*heartBeat;
+      targetY=heartCenterY+(targetY-heartCenterY)*heartBeat;
     }
     const stiffness=targetKind==="planet"?34:targetKind==="love"||targetKind==="name"?42:32;
     const damping=2*Math.sqrt(stiffness)*1.04;
     p.vx+=(stiffness*(targetX-p.x)-damping*p.vx)*dt;
     p.vy+=(stiffness*(targetY-p.y)-damping*p.vy)*dt;
     p.x+=p.vx*dt;p.y+=p.vy*dt;
+    if(transitionAge<1.25&&i%3===0&&(Math.abs(p.vx)+Math.abs(p.vy))>26){
+      const trail=Math.min(12,(Math.abs(p.vx)+Math.abs(p.vy))*.028);
+      const velocity=Math.hypot(p.vx,p.vy)||1;
+      ctx.globalAlpha=(1-transitionAge/1.25)*.24;ctx.strokeStyle=p.heart?"#ff9fcf":"#e5d5ff";
+      ctx.lineWidth=.8;ctx.beginPath();ctx.moveTo(p.x,p.y);ctx.lineTo(p.x-p.vx/velocity*trail,p.y-p.vy/velocity*trail);ctx.stroke();
+    }
     const twinkle=textShape?.9+.1*(.5+.5*Math.sin(time*.0015+p.phase*.15)):.78+.22*Math.sin(phase*1.4);const glow=p.hue<.42?CONFIG.colors.pink:p.hue<.72?CONFIG.colors.violet:CONFIG.colors.gold;
     let depthAlpha=1;
     if(targetKind==="planet"&&p.orbitBand!==undefined)depthAlpha=.68+.32*Math.sin(phase*1.3);
@@ -395,11 +465,16 @@ function draw(time) {
     ctx.globalAlpha=globePoint?depthAlpha*(.7+.3*twinkle):(crispText?.98:p.alpha)*twinkle*depthAlpha;
     ctx.fillStyle=globePoint?(p.globeDepth>.48?"#fffaff":p.globeDepth>-.18?"#ffc9f0":"#876aab"):p.heart?(p.hue<.68?"#ff9fcf":"#ffd8eb"):headlineParticle?"#ffffff":textScene?(p.hue<.24?"#fff4f9":p.hue<.5?"#ffd0e4":p.hue<.76?"#fff0c9":"#f5edff"):glow;
     ctx.shadowBlur=0;
-    const pointSize=globePoint?(1.1+(p.globeSeed%7)*.12)*(p.globeDepth>.25?1.08:.82):p.heart?1.1+p.hue*.25:textShape?1.35+(p.hue*.28):p.r*(headlineParticle?1.45:p.halo?.7:1)*(crispText?1.12:(.78+.22*twinkle));
+    const pointSize=globePoint?(1.1+(p.globeSeed%7)*.12)*(p.globeDepth>.25?1.08:.82):p.heart?1.25+p.hue*.3:textShape?1.35+(p.hue*.28):p.r*(headlineParticle?1.45:p.halo?.7:1)*(crispText?1.12:(.78+.22*twinkle));
     ctx.beginPath();ctx.arc(p.x,p.y,pointSize,0,6.283);ctx.fill();
   }
   ctx.globalAlpha=1;ctx.shadowBlur=0;
   if(targetKind!=="planet")drawPlanet(time);
+  drawRomanticEffects(time);
+  if(targetKind==="envelope"&&time>=ambientHeartTimer&&hearts.length<28){
+    hearts.push({x:rand(width*.05,width*.95),y:rand(height*.18,height*.8),vx:rand(-.12,.12),vy:rand(-.62,-.25),life:1.25,phase:rand(0,6)});
+    ambientHeartTimer=time+rand(260,460);
+  }
   for(let i=hearts.length-1;i>=0;i--){const h=hearts[i];h.x+=h.vx*dt;h.y+=h.vy*dt;h.life-=dt/1700;if(h.life<=0){hearts.splice(i,1);continue;}ctx.globalAlpha=h.life;ctx.font="13px serif";ctx.fillStyle=i%2?CONFIG.colors.pink:CONFIG.colors.gold;ctx.fillText(i%3===0?"✦":"♥",h.x+Math.sin(time*.003+h.phase)*4,h.y);}
   ctx.globalAlpha=1;ctx.shadowBlur=0;
   requestAnimationFrame(draw);
