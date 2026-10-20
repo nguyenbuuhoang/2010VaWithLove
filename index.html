@@ -16,10 +16,15 @@
     <canvas id="space" aria-hidden="true"></canvas>
     <div class="vignette" aria-hidden="true"></div>
     <div class="memory-photos" id="memoryPhotos" aria-hidden="true"></div>
-    <section class="message" aria-live="polite" aria-atomic="true">
+    <header class="topline" aria-label="Thiệp gửi Vân Anh, ngày 20 tháng 10">
+      <span class="topline-mark" aria-hidden="true">✦</span>
+      <span>GỬI RIÊNG VÂN ANH</span>
+      <span class="topline-date">20 THÁNG 10</span>
+    </header>
+    <section class="message" aria-label="Lời chúc dành cho Vân Anh">
       <p class="eyebrow" id="eyebrow"></p>
       <article class="letter-card" id="letterCard" aria-label="Bức thư chúc mừng 20 tháng 10">
-        <h1 id="messageTitle"></h1>
+        <h1 id="messageTitle" aria-live="polite"></h1>
         <p class="message-body" id="messageBody"></p>
         <p class="signoff" id="signoff"></p>
         <button class="continue-letter" id="continueLetter" type="button" hidden>Nhấn để tiếp tục <span aria-hidden="true">→</span></button>
@@ -30,6 +35,14 @@
       <span class="envelope-flap"></span><span class="envelope-heart">♥</span>
       <span class="envelope-caption">Gửi Vân Anh <span>·</span> nhấn để mở</span>
     </button>
+    <p class="hint" id="hint"><span class="hint-dot" aria-hidden="true"></span><span id="hintText">Chạm vào màn hình để tạo sóng sáng</span></p>
+    <nav class="controls" id="controls" aria-label="Điều khiển thiệp">
+      <button class="control-button replay" id="replayButton" type="button" aria-label="Phát lại từ đầu">
+        <span aria-hidden="true">↻</span><span class="replay-label">Phát lại</span>
+      </button>
+      <p class="scene-counter" aria-live="polite"><span id="counter">01</span><i aria-hidden="true">/</i><span id="totalScenes">12</span></p>
+      <button class="control-button next" id="nextButton" type="button" aria-label="Chuyển cảnh tiếp theo">Tiếp <span aria-hidden="true">→</span></button>
+    </nav>
   </main>
   <script src="script.js"></script>
 </body>

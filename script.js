@@ -31,10 +31,15 @@ const eyebrowEl = document.getElementById("eyebrow");
 const signoffEl = document.getElementById("signoff");
 const counterEl = document.getElementById("counter");
 const hintEl = document.getElementById("hint");
+const hintTextEl = document.getElementById("hintText");
 const letterCard = document.getElementById("letterCard");
 const envelope = document.getElementById("envelope");
 const memoryPhotos = document.getElementById("memoryPhotos");
 const continueLetter = document.getElementById("continueLetter");
+const replayButton = document.getElementById("replayButton");
+const nextButton = document.getElementById("nextButton");
+const totalScenesEl = document.getElementById("totalScenes");
+const controls = document.getElementById("controls");
 const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 const rand = (min, max) => min + Math.random() * (max - min);
 const particles = [];
@@ -42,7 +47,7 @@ const stars = [];
 const hearts = [];
 const meteors = [];
 let width = 0, height = 0, dpr = 1, sceneIndex = 0, sceneStarted = 0, lastTime = 0;
-let targets = [], targetKind = "orbit", pointerWave = 0, waveX = 0, waveY = 0, frameCount = 0;
+let targets = [], targetKind = "orbit", pointerWave = 0, waveX = 0, waveY = 0;
 let heartCenterX = 0, heartCenterY = 0, heartRadiusX = 0, heartRadiusY = 0;
 let advanceTimer = 0, resizeTimer = 0, typingTimer = 0, ambientHeartTimer = 0, relationshipTimer = 0, opened = false;
 let photoTimer = 0, photoRun = 0, photoFiles = [], photoOrder = [], photoCursor = 0;
@@ -123,6 +128,7 @@ function resize() {
   ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
   seedStars();
   setTargets(CONFIG.scenes[sceneIndex].shape, true);
+  if(reducedMotion)requestAnimationFrame(draw);
 }
 
 function seedStars() {
@@ -283,39 +289,6 @@ function heartTargets(cx,cy,scale,count,layers=1,minSpacing=1.7){
   return out;
 }
 
-function ringTextTargets(text,cx,cy,radius,fontSize){
-  const off=document.createElement("canvas"),o=off.getContext("2d",{willReadFrequently:true});
-  off.width=1000;off.height=120;
-  o.font='700 '+fontSize+'px "Be Vietnam Pro", Arial, sans-serif';
-  o.textAlign="center";o.textBaseline="middle";o.fillStyle="#fff";o.fillText(text,500,60,960);
-  const data=o.getImageData(0,0,off.width,off.height).data,pts=[];
-  for(let y=0;y<off.height;y+=4)for(let x=0;x<off.width;x+=4){
-    if(data[(y*off.width+x)*4+3]>100&&Math.random()<.8){
-      const a=(x/1000-.5)*Math.PI*1.78-Math.PI/2,band=y<60?-1:1;
-      pts.push({x:cx+Math.cos(a)*(radius+band*fontSize*.8),y:cy+Math.sin(a)*(radius*.62+band*fontSize*.55),orbit:true,ringLetter:true});
-    }
-  }
-  return pts;
-}
-
-function orbitalTextTargets(text,cx,cy,radius,tilt,fontSize,band){
-  const off=document.createElement("canvas"),o=off.getContext("2d",{willReadFrequently:true});
-  off.width=1500;off.height=130;
-  o.font='600 '+fontSize+'px "Be Vietnam Pro", Arial, sans-serif';o.textAlign="center";o.textBaseline="middle";o.fillStyle="#fff";
-  const repeat=(text+"      ✦      ").repeat(8);o.fillText(repeat,750,65,1460);
-  const data=o.getImageData(0,0,off.width,off.height).data,pts=[];
-  const step=3;
-  for(let y=0;y<off.height;y+=step)for(let x=0;x<off.width;x+=step){
-    if(data[(y*off.width+x)*4+3]<100||Math.random()>.88)continue;
-    const along=(x/off.width-.5)*Math.PI*2;
-    const normal=((y/off.height)-.5)*fontSize*1.45;
-    const px=Math.cos(along)*(radius+normal),py=Math.sin(along)*(radius*.52+normal);
-    const bx=px*Math.cos(tilt)-py*Math.sin(tilt),by=px*Math.sin(tilt)+py*Math.cos(tilt);
-    pts.push({x:cx+bx,y:cy+by,orbit:true,orbitBand:band,orbitAngle:along,orbitNormal:normal,orbitRadius:radius,orbitTilt:tilt,baseX:bx,baseY:by});
-  }
-  return pts;
-}
-
 function setTargets(shape, snap=false) {
   const isTextShape=shape==="love"||shape==="name"||shape==="particleText";
   let count=shape==="planet"?Math.round(Math.min(2600,Math.max(1350,width*height/175))*CONFIG.particleScale):shape==="heartFinal"?Math.round(Math.min(2400,Math.max(1400,width*height/170))*CONFIG.particleScale):shape==="particleText"?Math.round(Math.min(1600,Math.max(950,width*height/280))*CONFIG.particleScale):Math.round(Math.min(isTextShape?1600:1250,Math.max(isTextShape?850:500,width*height/(isTextShape?360:520)))*CONFIG.particleScale);
@@ -342,10 +315,12 @@ function setTargets(shape, snap=false) {
 function showScene(index) {
   sceneIndex=Math.max(0,Math.min(index,CONFIG.scenes.length-1));
   const scene=CONFIG.scenes[sceneIndex];
+  clearTimeout(typingTimer);typingTimer=0;
   heartDissolveAt=0;
   clearInterval(relationshipTimer);relationshipTimer=0;
   continueLetter.hidden=true;continueLetter.disabled=false;continueLetter.classList.remove("visible");
   stopMemoryPhotos();
+  hearts.length=0;
   [titleEl,bodyEl,eyebrowEl,signoffEl].forEach(el=>el.classList.remove("visible"));
   const stage=document.getElementById("stage");
   stage.classList.toggle("letter-scene",scene.shape==="letter");
@@ -355,13 +330,31 @@ function showScene(index) {
   envelope.hidden=scene.shape!=="envelope";
   envelope.classList.remove("opened");
   titleEl.textContent=scene.title; bodyEl.textContent=""; eyebrowEl.textContent=scene.eyebrow; signoffEl.textContent="";
-  setTargets(scene.shape);
+  setTargets(scene.shape,reducedMotion);
+  counterEl.textContent=String(sceneIndex+1).padStart(2,"0");
+  totalScenesEl.textContent=String(CONFIG.scenes.length).padStart(2,"0");
+  nextButton.hidden=scene.shape==="envelope"||scene.shape==="letter"||scene.shape==="heartFinal";
+  const hints={
+    planet:"Chạm màn hình để tạo gợn sáng",
+    particleText:"Một lời nhắn nhỏ đang được gửi đến em",
+    love:"Dành riêng cho bé Vân Anh",
+    name:"Chạm màn hình để tạo gợn sáng",
+    envelope:"Chạm vào phong thư để mở",
+    letter:"Đọc thư rồi nhấn “Nhấn để tiếp tục”",
+    heartFinal:"Chạm vào tim để hạt tan ra rồi hội tụ lại"
+  };
+  const manualScene=scene.shape==="envelope"||scene.shape==="letter"||scene.shape==="heartFinal";
+  hintTextEl.textContent=reducedMotion&&!manualScene
+    ?"Đang bật giảm chuyển động · nhấn Tiếp để xem tiếp"
+    :(hints[scene.shape]||"Chạm màn hình để tạo gợn sáng");
+  hintEl.hidden=false;
   if(scene.shape==="heartFinal")startMemoryPhotos();
   sceneStarted=performance.now();
   clearTimeout(advanceTimer);
+  if(reducedMotion)requestAnimationFrame(draw);
   if(scene.shape==="envelope"){ambientHeartTimer=performance.now()+160;return;}
   if(scene.shape!=="planet"&&scene.shape!=="particleText")requestAnimationFrame(()=>titleEl.classList.add("visible"));
-  if(scene.shape!=="envelope"&&scene.shape!=="letter"&&sceneIndex<CONFIG.scenes.length-2){
+  if(!reducedMotion&&scene.shape!=="envelope"&&scene.shape!=="letter"&&sceneIndex<CONFIG.scenes.length-2){
     advanceTimer=setTimeout(()=>showScene(sceneIndex+1),scene.duration||CONFIG.autoAdvanceMs);
   }
 }
@@ -386,7 +379,7 @@ function openLetter(){
     bodyEl.textContent=visibleText.replace(initialDuration,relationshipDuration(current));
     typingTimer=setTimeout(typeNext,plainBody[i-1]==="\n"?320:48);
   };
-  setTimeout(typeNext,1000);
+  typingTimer=setTimeout(typeNext,1000);
 }
 
 function formatLetterText(text){
@@ -486,24 +479,27 @@ function drawHeartAura(time,fade=0){
 }
 
 function draw(time) {
-  const dt=Math.min(0.034,Math.max(0.001,(time-(lastTime||time))/1000));lastTime=time;frameCount++;
+  const dt=Math.min(0.034,Math.max(0.001,(time-(lastTime||time))/1000));lastTime=time;
   ctx.clearRect(0,0,width,height);
   const dissolveProgress=heartDissolveAt?Math.min(1,(time-heartDissolveAt)/5000):0;
   const heartFade=dissolveProgress<.5?dissolveProgress*2:(1-dissolveProgress)*2;
   drawHeartAura(time,heartFade);
-  for(let i=0;i<stars.length;i++){const s=stars[i];const a=s.a*(.62+.38*Math.sin(time*.001*s.speed+s.phase));ctx.fillStyle=`rgba(235,222,255,${a})`;ctx.beginPath();ctx.arc(s.x,s.y,s.r,0,6.283);ctx.fill();}
+  ctx.fillStyle="#ebdeff";
+  for(let i=0;i<stars.length;i++){const s=stars[i];ctx.globalAlpha=s.a*(.62+.38*Math.sin(time*.001*s.speed+s.phase));ctx.beginPath();ctx.arc(s.x,s.y,s.r,0,6.283);ctx.fill();}
+  ctx.globalAlpha=1;
   drawMeteors(time,dt);
   drawScenePulse(time);
   // Subtle connector lines appear among neighboring forming particles.
   if(targetKind!=="letter"&&targetKind!=="envelope"&&particles.length<1250){
     const maxD=width<600?19:25, maxD2=maxD*maxD;
-    for(let i=0;i<particles.length;i+=3){const a=particles[i];for(let j=i+3;j<Math.min(i+12,particles.length);j+=3){const b=particles[j],dx=a.x-b.x,dy=a.y-b.y,d=dx*dx+dy*dy;if(d<maxD2){ctx.strokeStyle=`rgba(221,190,255,${(1-d/maxD2)*.11})`;ctx.lineWidth=.55;ctx.beginPath();ctx.moveTo(a.x,a.y);ctx.lineTo(b.x,b.y);ctx.stroke();}}}
+    ctx.strokeStyle="rgba(221,190,255,.11)";ctx.lineWidth=.55;
+    for(let i=0;i<particles.length;i+=3){const a=particles[i];for(let j=i+3;j<Math.min(i+12,particles.length);j+=3){const b=particles[j],dx=a.x-b.x,dy=a.y-b.y,d=dx*dx+dy*dy;if(d<maxD2){ctx.globalAlpha=1-d/maxD2;ctx.beginPath();ctx.moveTo(a.x,a.y);ctx.lineTo(b.x,b.y);ctx.stroke();}}}
+    ctx.globalAlpha=1;
   }
   let waveAge=(time-pointerWave)/1000;
   const waveOn=waveAge>=0&&waveAge<1.15;
   const waveR=waveOn?waveAge*(Math.min(width,height)*.68):0;
   if(waveOn){ctx.beginPath();ctx.arc(waveX,waveY,waveR,0,6.283);ctx.strokeStyle=`rgba(255,208,237,${(1-waveAge/1.15)*.33})`;ctx.lineWidth=1.5;ctx.shadowBlur=12;ctx.shadowColor=CONFIG.colors.pink;ctx.stroke();ctx.shadowBlur=0;}
-  const orbiting=targetKind==="planet"||targetKind==="orbit"||targetKind==="final"||targetKind==="words"||targetKind==="love"||targetKind==="name";
   if(targetKind==="planet")drawPlanet(time);
   const transitionAge=(time-sceneStarted)/1000;
   for(let i=0;i<particles.length;i++){
@@ -580,7 +576,7 @@ function draw(time) {
   }
   for(let i=hearts.length-1;i>=0;i--){const h=hearts[i];h.x+=h.vx*dt;h.y+=h.vy*dt;h.life-=dt/1.7;if(h.life<=0){hearts.splice(i,1);continue;}ctx.globalAlpha=h.life;ctx.font="13px serif";ctx.fillStyle=i%2?CONFIG.colors.pink:CONFIG.colors.gold;ctx.fillText(i%3===0?"✦":"♥",h.x+Math.sin(time*.003+h.phase)*4,h.y);}
   ctx.globalAlpha=1;ctx.shadowBlur=0;
-  requestAnimationFrame(draw);
+  if(!reducedMotion)requestAnimationFrame(draw);
 }
 
 
@@ -595,6 +591,7 @@ stage.addEventListener("contextmenu",e=>{
   e.preventDefault();
   dissolveHeart();
 });
+controls.addEventListener("pointerdown",e=>e.stopPropagation());
 envelope.addEventListener("click",openLetter);
 continueLetter.addEventListener("click",()=>{
   if(continueLetter.disabled)return;
@@ -602,7 +599,13 @@ continueLetter.addEventListener("click",()=>{
   letterCard.classList.add("leaving");
   setTimeout(()=>showScene(CONFIG.scenes.length-1),900);
 });
+nextButton.addEventListener("click",()=>showScene(sceneIndex+1));
+replayButton.addEventListener("click",()=>{
+  opened=false;
+  clearTimeout(typingTimer);clearInterval(relationshipTimer);relationshipTimer=0;
+  showScene(0);
+});
 window.addEventListener("resize",()=>{clearTimeout(resizeTimer);resizeTimer=setTimeout(resize,120);});
 resize();
 showScene(0);
-requestAnimationFrame(draw);
+if(!reducedMotion)requestAnimationFrame(draw);

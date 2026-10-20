@@ -116,3 +116,23 @@
 @keyframes memory-arrive{0%{opacity:0;transform:translate(-50%,-50%) scale(.14) rotate(0);filter:blur(8px)}34%{opacity:1}100%{opacity:1;transform:translate(calc(-50% + var(--dx)),calc(-50% + var(--dy))) scale(1) rotate(var(--tilt));filter:blur(0)}}
 @media(max-width:560px){.memory-photo{width:clamp(68px,19vw,88px);padding:3px;border-radius:5px}}
 @media(prefers-reduced-motion:reduce){.memory-photo{animation-duration:12s}}
+
+/* Persistent navigation, accessible focus and a scrollable letter on compact screens. */
+.topline,.hint,.controls{z-index:5}
+.controls{padding:5px;border:1px solid rgba(255,236,255,.08);border-radius:999px;background:rgba(12,9,24,.48);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px)}
+.control-button{position:relative;z-index:1}
+.control-button:focus-visible,.continue-letter:focus-visible,.envelope:focus-visible{outline:2px solid #ffd1e5;outline-offset:4px}
+.next{display:flex;align-items:center;gap:7px;padding:0 15px;font:500 10px "Be Vietnam Pro",system-ui,sans-serif;letter-spacing:.04em}
+.next[hidden]{display:none}
+.scene-counter{position:static;transform:none;min-width:54px;margin:0;text-align:center;font-variant-numeric:tabular-nums;color:rgba(248,234,255,.75)}
+.scene-counter span{display:inline;width:auto;height:auto;margin:0;background:none;vertical-align:baseline}
+.scene-counter i{padding:0 5px;color:rgba(236,222,255,.35);font-style:normal}
+.hint{bottom:max(83px,calc(env(safe-area-inset-bottom) + 76px));max-width:calc(100vw - 36px);text-align:center;line-height:1.5}
+.hint[hidden]{display:none}
+.letter-scene .message{top:50%;max-height:calc(100svh - 146px);overflow-y:auto;overscroll-behavior:contain;pointer-events:auto;scrollbar-width:thin;scrollbar-color:rgba(164,91,126,.35) transparent}
+.letter-scene .letter-card{pointer-events:auto}
+.letter-scene .message::-webkit-scrollbar{width:4px}
+.letter-scene .message::-webkit-scrollbar-thumb{border-radius:8px;background:rgba(164,91,126,.35)}
+@media(max-width:560px){.controls{left:18px;right:18px;bottom:max(18px,env(safe-area-inset-bottom))}.replay{padding:0 13px}.hint{bottom:max(78px,calc(env(safe-area-inset-bottom) + 74px))}.letter-scene .message{width:calc(100vw - 30px);max-height:calc(100svh - 136px);top:49%}}
+@media(max-height:560px){.topline{top:max(12px,env(safe-area-inset-top))}.controls{bottom:max(12px,env(safe-area-inset-bottom))}.hint{bottom:66px}.letter-scene .message{max-height:calc(100svh - 108px);top:47%}}
+@media(prefers-reduced-motion:reduce){.hint-dot{animation:none}.memory-photo,.control-button,.continue-letter{transition:none}}
