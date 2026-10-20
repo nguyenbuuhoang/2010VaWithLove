@@ -29,8 +29,6 @@ const titleEl = document.getElementById("messageTitle");
 const bodyEl = document.getElementById("messageBody");
 const eyebrowEl = document.getElementById("eyebrow");
 const signoffEl = document.getElementById("signoff");
-const hintEl = document.getElementById("hint");
-const hintTextEl = document.getElementById("hintText");
 const letterCard = document.getElementById("letterCard");
 const envelope = document.getElementById("envelope");
 const memoryPhotos = document.getElementById("memoryPhotos");
@@ -363,20 +361,6 @@ function showScene(index) {
   envelope.classList.remove("opened");
   titleEl.textContent=scene.title; bodyEl.textContent=""; eyebrowEl.textContent=scene.eyebrow; signoffEl.textContent="";
   setTargets(scene.shape,reducedMotion);
-  const hints={
-    planet:"Chạm màn hình để tạo gợn sáng",
-    particleText:"Một lời nhắn nhỏ đang được gửi đến em",
-    love:"Dành riêng cho bé Vân Anh",
-    name:"Chạm màn hình để tạo gợn sáng",
-    envelope:"Chạm vào phong thư để mở",
-    letter:"Đọc thư rồi nhấn “Nhấn để tiếp tục”",
-    heartFinal:"Chạm vào tim để hạt tan ra rồi hội tụ lại"
-  };
-  const manualScene=scene.shape==="envelope"||scene.shape==="letter"||scene.shape==="heartFinal";
-  hintTextEl.textContent=reducedMotion&&!manualScene
-    ?"Giảm chuyển động · chạm để chuyển cảnh"
-    :(hints[scene.shape]||"Chạm màn hình để tạo gợn sáng");
-  hintEl.hidden=false;
   if(scene.shape==="heartFinal")startMemoryPhotos();
   sceneStarted=performance.now();
   clearTimeout(advanceTimer);
