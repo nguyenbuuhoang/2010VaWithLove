@@ -587,7 +587,13 @@ function draw(time) {
 
 
 
-document.getElementById("stage").addEventListener("pointerdown",e=>{if(targetKind==="heartFinal"){dissolveHeart();return;}burst(e.clientX,e.clientY);});
+const stage=document.getElementById("stage");
+stage.addEventListener("pointerdown",e=>{if(targetKind==="heartFinal"){dissolveHeart();return;}burst(e.clientX,e.clientY);});
+stage.addEventListener("contextmenu",e=>{
+  if(targetKind!=="heartFinal")return;
+  e.preventDefault();
+  dissolveHeart();
+});
 envelope.addEventListener("click",openLetter);
 continueLetter.addEventListener("click",()=>{
   if(continueLetter.disabled)return;
