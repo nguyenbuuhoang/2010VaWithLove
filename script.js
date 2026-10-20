@@ -391,7 +391,7 @@ function openLetter(){
 
 function formatLetterText(text){
   const escapeHtml=value=>value.replace(/[&<>"']/g,char=>({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"}[char]));
-  return escapeHtml(text).replace("{{DURATION}}",'<span id="relationshipDuration"></span>').replace(/\*\*(.+?)\*\*/g,"<strong>$1</strong>").replace(/\*(.+?)\*/g,"<em>$1</em>").replace(/\n/g,"<br>");
+  return escapeHtml(text).replace("{{DURATION}}",'<span id="relationshipDuration"></span>').replace(/\*\*(.+?)\*\*/g,"<strong>$1</strong>").replace(/\*(.+?)\*/g,"<em>$1</em>").replace(/\n{2,}/g,'<span class="paragraph-gap"></span>').replace(/\n/g,"<br>");
 }
 function drawPlanet(time) {
   if(targetKind!=="planet") return;
