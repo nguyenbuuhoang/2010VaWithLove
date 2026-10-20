@@ -153,11 +153,7 @@ function makeTargets(shape,targetCount) {
     // Large, filled ruby heart made only from orbiting and breathing points.
     const unit=Math.min(width,height),scale=unit*.39;
     pts=heartTargets(cx,height*.49,scale,1550,2,Math.max(2.8,unit/145));
-    for(let i=0;i<pts.length;i++){
-      const point=pts[i],nx=(point.x-cx)/(scale*.9),ny=(height*.49-point.y)/(scale*.9);
-      const highlight=Math.max(0,1-Math.hypot((nx+.38)*1.55,(ny-.42)*1.35));
-      point.color=highlight>.38?"#ffd7e4":highlight>.12?"#ff829f":(i%7===0?"#ff687f":"#f52e55");
-    }
+    for(let i=0;i<pts.length;i++)pts[i].color="#ff2448";
   } else if(shape === "envelope") {
     const cx2=width*.5,cy2=height*.56,w=Math.min(width*.68,360),h=Math.min(height*.24,150);
     for(let i=0;i<220;i++){
@@ -488,7 +484,7 @@ function draw(time) {
     ctx.globalAlpha=globePoint?depthAlpha*(.7+.3*twinkle):(crispText?.98:p.alpha)*twinkle*depthAlpha;
     ctx.fillStyle=targetKind==="heartFinal"?(p.color||"#f52e55"):globePoint?(p.globeDepth>.48?"#fffaff":p.globeDepth>-.18?"#ffc9f0":"#876aab"):p.heart?(p.hue<.68?"#ff9fcf":"#ffd8eb"):headlineParticle?"#ffffff":textScene?(p.hue<.24?"#fff4f9":p.hue<.5?"#ffd0e4":p.hue<.76?"#fff0c9":"#f5edff"):glow;
     ctx.shadowBlur=0;
-    const pointSize=targetKind==="heartFinal"?1.45+(p.r*.34)+(p.color==="#ffd7e4"?.35:0):globePoint?(1.1+(p.globeSeed%7)*.12)*(p.globeDepth>.25?1.08:.82):p.heart?1.25+p.hue*.3:textShape?1.35+(p.hue*.28):p.r*(headlineParticle?1.45:p.halo?.7:1)*(crispText?1.12:(.78+.22*twinkle));
+    const pointSize=targetKind==="heartFinal"?1.55+(p.r*.32):globePoint?(1.1+(p.globeSeed%7)*.12)*(p.globeDepth>.25?1.08:.82):p.heart?1.25+p.hue*.3:textShape?1.35+(p.hue*.28):p.r*(headlineParticle?1.45:p.halo?.7:1)*(crispText?1.12:(.78+.22*twinkle));
     ctx.beginPath();ctx.arc(p.x,p.y,pointSize,0,6.283);ctx.fill();
   }
   ctx.globalAlpha=1;ctx.shadowBlur=0;
