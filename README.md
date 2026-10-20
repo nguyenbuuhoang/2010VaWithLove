@@ -1,6 +1,6 @@
 # Gửi Vân Anh — lời chúc 20/10
 
-Thiệp tương tác chạy bằng HTML, CSS và JavaScript thuần, không cần cài thư viện hoặc backend. Canvas tạo hành tinh, chữ hạt và trái tim đỏ; chạm màn hình tạo sóng sáng. Ở cảnh cuối, ảnh kỷ niệm lần lượt bay ra; đủ 10 ảnh thì ảnh cũ bắt đầu mờ dần.
+Thiệp tương tác viết bằng HTML, CSS và JavaScript thuần. Canvas tự vẽ hành tinh, vòng quỹ đạo, chữ và trái tim bằng hạt; nhạc nền là giai điệu tạo trực tiếp bằng Web Audio, không dùng video hay tệp nhạc dựng sẵn.
 
 ## Chạy trên máy tính
 
@@ -12,23 +12,24 @@ py -m http.server 8000 --bind 0.0.0.0
 
 Mở `http://localhost:8000`. Để xem trên điện thoại cùng mạng Wi-Fi, mở `http://IP-máy-tính:8000`.
 
+## Trình tự và điều khiển
+
+- Các cảnh hành tinh, đếm ngược 3–2–1, “20/10”, “Mừng ngày của em”, “Anh muốn nói là…”, “Anh yêu em” và tên Vân Anh tự chuyển lần lượt.
+- Chạm vào phong thư để mở. Nội dung thư được gõ dần; đọc xong, nhấn **Nhấn để tiếp tục** để đến trái tim hạt.
+- Trái tim đỏ đập nhẹ. Tối đa năm ảnh kỷ niệm hiện cùng lúc; nhấn ảnh để xem lớn và nhấn **×** hoặc phím Escape để đóng. Nhấn trái tim để ảnh tan đi và trái tim tỏa hạt rồi kết lại.
+- Trình duyệt thường chặn âm thanh tự phát. Nhạc bắt đầu ở lần chạm/click đầu tiên; nút **Nhạc** ở góc trên bên phải dùng để tắt hoặc bật lại.
+- Khi bật cài đặt giảm chuyển động của thiết bị, chạm để chuyển cảnh.
+
+## Tùy chỉnh
+
+Sửa `CONFIG` ở đầu `script.js` để đổi màu, mật độ hạt, thời gian cảnh, ngày bắt đầu và nội dung thư. Ngày bắt đầu hiện là **10/06/2026 00:00:00, giờ Việt Nam**; đồng hồ trong thư tự cập nhật theo thời gian thực. Danh sách ảnh nằm ở `image/manifest.json`, ảnh thu nhỏ WebP ở `image/thumbs/`.
+
 ## Triển khai
 
 ### GitHub Pages
 
-Repository có ảnh gốc trong `image/` và 151 ảnh WebP nhẹ trong `image/thumbs/` để hiệu ứng ảnh bay tải nhanh trên điện thoại. Vào **Settings → Pages**, chọn **Deploy from a branch**, nhánh `main`, thư mục `/ (root)`, rồi lưu. Trang sẽ được phục vụ từ `index.html`.
+Trong repository, vào **Settings → Pages**, chọn **Deploy from a branch**, nhánh `main`, thư mục `/ (root)`, rồi lưu. Trang được phục vụ từ `index.html`.
 
 ### Vercel
 
 Import repository, chọn **Other** làm framework preset, để trống build command và đặt output directory là `.` rồi nhấn **Deploy**.
-
-## Điều khiển
-
-- Các cảnh mở đầu tự chạy; khi bật giảm chuyển động, chạm màn hình để chuyển cảnh.
-- Phong thư và nút **Nhấn để tiếp tục** điều khiển phần mở và kết thúc lá thư.
-- Ở cảnh cuối, click để hạt tim tỏa ra rồi kết lại.
-- Khi thiết bị bật giảm chuyển động, cảnh dừng tự chuyển và dùng nút điều khiển để tiếp tục.
-
-## Tùy chỉnh
-
-Sửa `CONFIG` ở đầu `script.js` để chỉnh màu hạt, mật độ (`particleScale`), tốc độ chuyển cảnh và nội dung lời chúc. Thời điểm bắt đầu yêu nhau hiện đặt là **10/06/2026 00:00:00, giờ Việt Nam**. Danh sách ảnh dùng trong hiệu ứng nằm ở `image/manifest.json`.

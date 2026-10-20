@@ -87,10 +87,10 @@
 .vignette{background:radial-gradient(ellipse at center,transparent 40%,rgba(2,2,8,.28) 80%,rgba(2,2,8,.72) 130%)}
 .stage{background:radial-gradient(ellipse at 50% 52%,rgba(177,123,220,.11),transparent 39%),radial-gradient(ellipse at 18% 76%,rgba(52,92,165,.11),transparent 34%),radial-gradient(ellipse at 84% 24%,rgba(174,83,151,.09),transparent 32%),linear-gradient(145deg,#070711,#100c1d 52%,#060610)}
 
-/* Handwriting uses Windows fonts already installed, so it works without a network font request. */
+/* Load the handwritten title from Google Fonts; keep the letter body crisp and easy to read. */
 .letter-scene .message h1,
-.letter-scene .signoff{font-family:"Segoe Script","Segoe Print","Comic Sans MS",cursive}
-.letter-scene .message-body{font-family:"Segoe Print","Segoe Script","Comic Sans MS",cursive}
+.letter-scene .signoff{font-family:"Dancing Script","Playfair Display",cursive}
+.letter-scene .message-body{font-family:"Be Vietnam Pro",system-ui,sans-serif}
 .letter-scene .message-body strong{font-weight:700;color:#8e3155}
 .letter-scene .message-body em{font-style:italic;color:#785260}
 .letter-scene .signoff{font-size:clamp(15px,3.5vw,21px);line-height:1.45}
@@ -124,6 +124,16 @@
 .photo-lightbox-close{position:absolute;top:max(14px,env(safe-area-inset-top));right:max(14px,env(safe-area-inset-right));z-index:1;width:46px;height:46px;border:1px solid rgba(255,240,249,.25);border-radius:50%;background:rgba(255,255,255,.1);color:#fff;font:300 32px/1 system-ui,sans-serif;cursor:pointer;backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px)}
 .photo-lightbox-close:hover{background:rgba(255,255,255,.2)}
 
+/* Quiet, accessible music control that stays clear of the letter and orbit. */
+.music-toggle{position:absolute;z-index:9;top:max(16px,env(safe-area-inset-top));right:max(16px,env(safe-area-inset-right));display:flex;align-items:center;gap:8px;min-height:40px;padding:0 13px;border:1px solid rgba(255,222,240,.2);border-radius:999px;background:rgba(18,13,31,.58);color:rgba(255,242,250,.82);font:500 11px "Be Vietnam Pro",system-ui,sans-serif;letter-spacing:.035em;backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);cursor:pointer;transition:background .25s ease,border-color .25s ease,transform .25s ease,box-shadow .25s ease;touch-action:manipulation}
+.music-toggle:hover{transform:translateY(-1px);background:rgba(37,22,48,.8);border-color:rgba(255,222,240,.38)}
+.music-toggle:focus-visible{outline:2px solid #ffd1e5;outline-offset:3px}
+.music-toggle-icon{color:#ffd0e4;font-size:19px;line-height:1}
+.music-pulse{width:6px;height:6px;border-radius:50%;background:rgba(238,218,234,.42);transition:background .3s ease,box-shadow .3s ease}
+.music-toggle.is-playing{border-color:rgba(255,171,207,.42);box-shadow:0 0 24px rgba(255,119,176,.1)}
+.music-toggle.is-playing .music-pulse{background:#ff9fc8;box-shadow:0 0 10px #ff7eae;animation:music-breathe 1.8s ease-in-out infinite}
+@keyframes music-breathe{50%{opacity:.48;transform:scale(.72)}}
+
 /* Persistent navigation, accessible focus and a scrollable letter on compact screens. */
 .topline,.hint,.controls{z-index:5}
 .controls{padding:5px;border:1px solid rgba(255,236,255,.08);border-radius:999px;background:rgba(12,9,24,.48);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px)}
@@ -142,7 +152,7 @@
 .letter-scene .message::-webkit-scrollbar-thumb{border-radius:8px;background:rgba(164,91,126,.35)}
 @media(max-width:560px){.controls{left:18px;right:18px;bottom:max(18px,env(safe-area-inset-bottom))}.replay{padding:0 13px}.hint{bottom:max(78px,calc(env(safe-area-inset-bottom) + 74px))}.letter-scene .message{width:calc(100vw - 30px);max-height:calc(100svh - 136px);top:49%}}
 @media(max-height:560px){.topline{top:max(12px,env(safe-area-inset-top))}.controls{bottom:max(12px,env(safe-area-inset-bottom))}.hint{bottom:66px}.letter-scene .message{max-height:calc(100svh - 108px);top:47%}}
-@media(prefers-reduced-motion:reduce){.hint-dot{animation:none}.memory-photo,.control-button,.continue-letter{transition:none}}
+@media(prefers-reduced-motion:reduce){.hint-dot,.music-pulse{animation:none}.memory-photo,.control-button,.continue-letter,.music-toggle{transition:none}}
 
 /* Keep the complete letter and its continue button inside the phone viewport. */
 .letter-scene .message{top:50%;width:min(92vw,560px);max-height:none;overflow:visible;overscroll-behavior:auto;padding:0}
