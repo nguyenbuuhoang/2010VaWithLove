@@ -35,7 +35,6 @@ const memoryPhotos = document.getElementById("memoryPhotos");
 const photoLightbox = document.getElementById("photoLightbox");
 const photoLightboxImage = document.getElementById("photoLightboxImage");
 const closePhotoButton = document.getElementById("closePhoto");
-const musicToggle = document.getElementById("musicToggle");
 const continueLetter = document.getElementById("continueLetter");
 const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 const rand = (min, max) => min + Math.random() * (max - min);
@@ -50,104 +49,6 @@ let advanceTimer = 0, resizeTimer = 0, typingTimer = 0, ambientHeartTimer = 0, r
 let photoTimer = 0, photoRun = 0, photoFiles = [], photoOrder = [], photoCursor = 0;
 let heartDissolveAt = 0, heartDissolveTimer = 0;
 let photoReturnFocus = null;
-let audioContext = null, musicBus = null, musicLoopTimer = 0, musicGeneration = 0;
-let musicEnabled = false, musicStarting = false, musicMutedByUser = false;
-const MUSIC_BARS = [
-  { pad: [48,55,59,64], notes: [60,64,67,71,76,71,67,64] },
-  { pad: [43,50,55,62], notes: [59,62,67,74,79,74,67,62] },
-  { pad: [45,52,55,60], notes: [60,64,67,72,76,72,67,64] },
-  { pad: [41,48,52,57], notes: [60,65,69,72,77,72,69,65] }
-];
-
-function updateMusicButton(){
-  musicToggle.classList.toggle("is-playing",musicEnabled);
-  musicToggle.setAttribute("aria-pressed",String(musicEnabled));
-  musicToggle.setAttribute("aria-label",musicEnabled?"Tắt nhạc nền":"Bật nhạc nền");
-}
-
-function createMusicBus(){
-  const input=audioContext.createGain(),delay=audioContext.createDelay(.8);
-  const feedback=audioContext.createGain(),wet=audioContext.createGain();
-  const now=audioContext.currentTime;
-  input.gain.setValueAtTime(.0001,now);input.gain.setTargetAtTime(.52,now,.4);
-  delay.delayTime.value=.31;feedback.gain.value=.2;wet.gain.value=.16;
-  input.connect(audioContext.destination);input.connect(delay);
-  delay.connect(feedback);feedback.connect(delay);delay.connect(wet);wet.connect(audioContext.destination);
-  return {input,delay,feedback,wet};
-}
-
-function scheduleMusicNote(midi,when,duration,level,pan,isPad,bus){
-  const frequency=440*Math.pow(2,(midi-69)/12);
-  const fundamental=audioContext.createOscillator(),harmonic=audioContext.createOscillator();
-  const envelope=audioContext.createGain(),fundamentalLevel=audioContext.createGain(),harmonicLevel=audioContext.createGain();
-  const panner=audioContext.createStereoPanner?audioContext.createStereoPanner():null;
-  fundamental.type=isPad?"sine":"triangle";harmonic.type="sine";
-  fundamental.frequency.setValueAtTime(frequency,when);fundamental.detune.value=isPad?-3:0;
-  harmonic.frequency.setValueAtTime(frequency*2.01,when);
-  fundamentalLevel.gain.value=isPad?.78:.72;harmonicLevel.gain.value=isPad?.16:.18;
-  envelope.gain.setValueAtTime(.0001,when);
-  if(isPad){
-    envelope.gain.linearRampToValueAtTime(level,when+.42);
-    envelope.gain.setValueAtTime(level*.72,when+duration*.7);
-    envelope.gain.exponentialRampToValueAtTime(.0001,when+duration);
-  }else{
-    envelope.gain.linearRampToValueAtTime(level,when+.025);
-    envelope.gain.exponentialRampToValueAtTime(.0001,when+duration);
-  }
-  fundamental.connect(fundamentalLevel);harmonic.connect(harmonicLevel);
-  fundamentalLevel.connect(envelope);harmonicLevel.connect(envelope);
-  if(panner){panner.pan.value=pan;envelope.connect(panner);panner.connect(bus.input);}else envelope.connect(bus.input);
-  fundamental.start(when);harmonic.start(when);
-  fundamental.stop(when+duration+.02);harmonic.stop(when+duration+.02);
-  fundamental.onended=()=>{
-    fundamental.disconnect();harmonic.disconnect();fundamentalLevel.disconnect();harmonicLevel.disconnect();
-    envelope.disconnect();if(panner)panner.disconnect();
-  };
-}
-
-function scheduleMusicLoop(generation){
-  if(!musicEnabled||generation!==musicGeneration||!musicBus)return;
-  const beat=60/68,bar=beat*4,start=audioContext.currentTime+.12;
-  for(let i=0;i<MUSIC_BARS.length;i++){
-    const chord=MUSIC_BARS[i],barStart=start+i*bar;
-    for(let j=0;j<chord.pad.length;j++)scheduleMusicNote(chord.pad[j],barStart,bar-.08,.024,(j-1.5)*.16,true,musicBus);
-    for(let j=0;j<chord.notes.length;j++)scheduleMusicNote(chord.notes[j],barStart+j*beat*.5,1.12,.05,(j%2?-.18:.18),false,musicBus);
-  }
-  musicLoopTimer=setTimeout(()=>scheduleMusicLoop(generation),bar*MUSIC_BARS.length*1000-180);
-}
-
-async function startMusic(userInitiated=false){
-  if(musicEnabled||musicStarting)return;
-  if(userInitiated)musicMutedByUser=false;
-  musicStarting=true;const generation=++musicGeneration;
-  try{
-    const AudioContextClass=window.AudioContext||window.webkitAudioContext;
-    if(!AudioContextClass)throw new Error("Web Audio is unavailable");
-    if(!audioContext)audioContext=new AudioContextClass();
-    await audioContext.resume();
-    if(generation!==musicGeneration)return;
-    musicBus=createMusicBus();musicEnabled=true;musicStarting=false;updateMusicButton();
-    scheduleMusicLoop(generation);
-  }catch{
-    if(generation===musicGeneration){musicStarting=false;musicEnabled=false;updateMusicButton();}
-  }
-}
-
-function stopMusic(userInitiated=true){
-  if(userInitiated)musicMutedByUser=true;
-  if(!musicEnabled&&!musicStarting)return;
-  musicGeneration++;musicStarting=false;musicEnabled=false;clearTimeout(musicLoopTimer);musicLoopTimer=0;
-  const oldBus=musicBus;musicBus=null;
-  if(oldBus&&audioContext){
-    const now=audioContext.currentTime;
-    oldBus.input.gain.setTargetAtTime(.0001,now,.12);oldBus.wet.gain.setTargetAtTime(.0001,now,.12);
-    setTimeout(()=>{oldBus.input.disconnect();oldBus.delay.disconnect();oldBus.feedback.disconnect();oldBus.wet.disconnect();},1400);
-  }
-  updateMusicButton();
-}
-
-function toggleMusic(){if(musicEnabled||musicStarting)stopMusic(true);else startMusic(true);}
-
 function openMemoryPhoto(image, card){
   const source=image.dataset.fullsrc;
   if(!source)return;
@@ -701,14 +602,8 @@ function draw(time) {
 
 
 const stage=document.getElementById("stage");
-document.addEventListener("pointerdown",e=>{
-  if(e.target.closest("#musicToggle")||musicMutedByUser||musicEnabled||musicStarting)return;
-  // Browsers block autoplay. The first real tap/click is the earliest reliable start point.
-  void startMusic(false);
-},{capture:true,passive:true});
-musicToggle.addEventListener("click",toggleMusic);
 stage.addEventListener("pointerdown",e=>{
-  if(e.target.closest("#musicToggle,.memory-photo,.photo-lightbox"))return;
+  if(e.target.closest(".memory-photo,.photo-lightbox"))return;
   if(targetKind==="heartFinal"){dissolveHeart();return;}
   const shape=CONFIG.scenes[sceneIndex].shape;
   if(reducedMotion&&shape!=="envelope"&&shape!=="letter"&&sceneIndex<CONFIG.scenes.length-2){showScene(sceneIndex+1);return;}
