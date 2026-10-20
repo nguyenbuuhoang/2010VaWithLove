@@ -161,13 +161,17 @@ function makeTargets(shape,targetCount) {
       {x:cx+unit*.125,y:height*.49,r:unit*.08,colors:["#d695ee","#efc5f5","#fff0ff"]}
     ];
     for(let f=0;f<flowers.length;f++){
-      const flower=flowers[f],count=220,golden=Math.PI*(3-Math.sqrt(5));
-      for(let i=0;i<count;i++){
-        const a=i*golden,rad=Math.sqrt((i+.5)/count),petal=.72+.28*(.5+.5*Math.cos(a*5));
-        const rr=flower.r*rad*petal;
-        const center=i<count*.11;
-        pts.push({x:flower.x+Math.cos(a)*rr,y:flower.y+Math.sin(a)*rr,color:center?(i%2?"#fff4c5":"#ffda83"):flower.colors[Math.floor((i/count)*flower.colors.length)%flower.colors.length],flower:true,seed:i+f*count});
+      const flower=flowers[f],golden=Math.PI*(3-Math.sqrt(5));
+      // Five overlapping filled petal lobes create a recognizable daisy/rose silhouette.
+      for(let petal=0;petal<5;petal++){
+        const angle=petal*Math.PI*2/5-Math.PI/2,pcx=flower.x+Math.cos(angle)*flower.r*.34,pcy=flower.y+Math.sin(angle)*flower.r*.34;
+        for(let i=0;i<44;i++){
+          const a=i*golden,rad=Math.sqrt((i+.5)/44)*flower.r*.62;
+          const shade=flower.colors[Math.min(flower.colors.length-1,Math.floor((i/44)*flower.colors.length))];
+          pts.push({x:pcx+Math.cos(a)*rad,y:pcy+Math.sin(a)*rad,color:shade,flower:true,seed:i+petal*44});
+        }
       }
+      for(let i=0;i<55;i++){const a=i*golden,rr=Math.sqrt((i+.5)/55)*flower.r*.29;pts.push({x:flower.x+Math.cos(a)*rr,y:flower.y+Math.sin(a)*rr,color:i%4===0?"#fff4c5":"#ffda83",flower:true,seed:i});}
       // Luminous pollen ring around each flower's small golden heart.
       for(let j=0;j<24;j++){const a=j/24*Math.PI*2;pts.push({x:flower.x+Math.cos(a)*flower.r*.17,y:flower.y+Math.sin(a)*flower.r*.17,color:"#fff3bd",flower:true,seed:j});}
     }
