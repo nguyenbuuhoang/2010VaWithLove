@@ -138,6 +138,11 @@ function startMemoryPhotos(){
           card.className="memory-photo arriving";placeCard(card);
           img.dataset.fullsrc="image/"+encodeURIComponent(file);img.src=url;img.alt="";img.draggable=false;img.decoding="async";
           img.onerror=()=>card.remove();card.appendChild(img);memoryPhotos.appendChild(card);
+          card.addEventListener("click",e=>{
+            e.stopPropagation();
+            if(card.classList.contains("retiring")||memoryPhotos.classList.contains("dissolving"))return;
+            openMemoryPhoto(img,card);
+          });
           card.addEventListener("animationend",()=>card.classList.remove("arriving"),{once:true});
         }
         photoTimer=setTimeout(release,2400);
@@ -601,12 +606,6 @@ stage.addEventListener("pointerdown",e=>{
   const shape=CONFIG.scenes[sceneIndex].shape;
   if(reducedMotion&&shape!=="envelope"&&shape!=="letter"&&sceneIndex<CONFIG.scenes.length-2){showScene(sceneIndex+1);return;}
   burst(e.clientX,e.clientY);
-});
-memoryPhotos.addEventListener("click",e=>{
-  const card=e.target.closest(".memory-photo");
-  if(!card||card.classList.contains("retiring")||memoryPhotos.classList.contains("dissolving"))return;
-  const image=card.querySelector("img");
-  if(image)openMemoryPhoto(image,card);
 });
 closePhotoButton.addEventListener("click",closeMemoryPhoto);
 photoLightbox.addEventListener("click",e=>{if(e.target===photoLightbox)closeMemoryPhoto();});
