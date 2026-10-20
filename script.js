@@ -34,6 +34,7 @@ const hintEl = document.getElementById("hint");
 const letterCard = document.getElementById("letterCard");
 const envelope = document.getElementById("envelope");
 const memoryPhotos = document.getElementById("memoryPhotos");
+const continueLetter = document.getElementById("continueLetter");
 const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 const rand = (min, max) => min + Math.random() * (max - min);
 const particles = [];
@@ -325,6 +326,7 @@ function showScene(index) {
   sceneIndex=Math.max(0,Math.min(index,CONFIG.scenes.length-1));
   const scene=CONFIG.scenes[sceneIndex];
   clearInterval(relationshipTimer);relationshipTimer=0;
+  continueLetter.hidden=true;continueLetter.classList.remove("visible");
   stopMemoryPhotos();
   [titleEl,bodyEl,eyebrowEl,signoffEl].forEach(el=>el.classList.remove("visible"));
   const stage=document.getElementById("stage");
@@ -361,7 +363,7 @@ function openLetter(){
   let i=0;
   bodyEl.textContent="";bodyEl.classList.add("visible");signoffEl.textContent="";signoffEl.classList.add("visible");
   const typeNext=()=>{
-    if(i>=plainBody.length){bodyEl.innerHTML=formatLetterText(finalScene.body);signoffEl.textContent=finalScene.signoff;updateRelationshipClock();relationshipTimer=setInterval(updateRelationshipClock,1000);advanceTimer=setTimeout(()=>showScene(CONFIG.scenes.length-1),15000);return;}
+    if(i>=plainBody.length){bodyEl.innerHTML=formatLetterText(finalScene.body);signoffEl.textContent=finalScene.signoff;updateRelationshipClock();relationshipTimer=setInterval(updateRelationshipClock,1000);continueLetter.hidden=false;requestAnimationFrame(()=>continueLetter.classList.add("visible"));return;}
     const visibleText=plainBody.slice(0,++i),current=Date.now();
     bodyEl.textContent=visibleText.replace(initialDuration,relationshipDuration(current));
     typingTimer=setTimeout(typeNext,plainBody[i-1]==="\n"?320:48);
@@ -568,6 +570,7 @@ function draw(time) {
 
 document.getElementById("stage").addEventListener("pointerdown",e=>burst(e.clientX,e.clientY));
 envelope.addEventListener("click",openLetter);
+continueLetter.addEventListener("click",()=>showScene(CONFIG.scenes.length-1));
 window.addEventListener("resize",()=>{clearTimeout(resizeTimer);resizeTimer=setTimeout(resize,120);});
 resize();
 showScene(0);

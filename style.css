@@ -100,6 +100,13 @@
 .letter-scene .message-body strong{font-weight:700;color:#8e3155}
 .letter-scene .message-body em{font-style:italic;color:#785260}
 .letter-scene .signoff{font-size:clamp(15px,3.5vw,21px);line-height:1.45}
+.continue-letter[hidden]{display:none!important}
+.continue-letter{display:flex;align-items:center;justify-content:center;gap:10px;margin:18px auto 0;padding:10px 18px;border:1px solid rgba(163,91,126,.34);border-radius:999px;background:linear-gradient(135deg,#fffaf8,#fbe8ed);color:#8e3155;font:600 12px "Be Vietnam Pro",system-ui,sans-serif;letter-spacing:.035em;box-shadow:0 5px 18px rgba(143,62,100,.1);cursor:pointer;opacity:0;transform:translateY(7px);transition:opacity .7s ease,transform .7s ease,box-shadow .25s ease,background .25s ease}
+.continue-letter.visible{opacity:1;transform:translateY(0)}
+.continue-letter span{color:#bd557e;font-size:17px;transition:transform .25s ease}
+.continue-letter:hover{background:#fff3f6;box-shadow:0 8px 24px rgba(143,62,100,.17)}
+.continue-letter:hover span{transform:translateX(3px)}
+@media(max-width:560px){.continue-letter{margin-top:13px;padding:9px 16px;font-size:11px}}
 
 /* A quiet ruby glow gives the particle heart room to stand out. */
 .stage.heart-final-scene{background:radial-gradient(ellipse at 50% 50%,rgba(145,15,43,.2),transparent 43%),radial-gradient(ellipse at 50% 52%,#160a16 0,#0d0912 57%,#07070d 100%)}
