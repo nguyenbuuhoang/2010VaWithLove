@@ -34,6 +34,9 @@ const hintTextEl = document.getElementById("hintText");
 const letterCard = document.getElementById("letterCard");
 const envelope = document.getElementById("envelope");
 const memoryPhotos = document.getElementById("memoryPhotos");
+const photoLightbox = document.getElementById("photoLightbox");
+const photoLightboxImage = document.getElementById("photoLightboxImage");
+const closePhotoButton = document.getElementById("closePhoto");
 const continueLetter = document.getElementById("continueLetter");
 const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 const rand = (min, max) => min + Math.random() * (max - min);
@@ -47,6 +50,24 @@ let heartCenterX = 0, heartCenterY = 0, heartRadiusX = 0, heartRadiusY = 0;
 let advanceTimer = 0, resizeTimer = 0, typingTimer = 0, ambientHeartTimer = 0, relationshipTimer = 0, opened = false;
 let photoTimer = 0, photoRun = 0, photoFiles = [], photoOrder = [], photoCursor = 0;
 let heartDissolveAt = 0, heartDissolveTimer = 0;
+let photoReturnFocus = null;
+
+function openMemoryPhoto(image, card){
+  const source=image.dataset.fullsrc;
+  if(!source)return;
+  photoReturnFocus=card;
+  photoLightboxImage.src=source;
+  photoLightbox.hidden=false;
+  closePhotoButton.focus({preventScroll:true});
+}
+
+function closeMemoryPhoto(){
+  if(photoLightbox.hidden)return;
+  photoLightbox.hidden=true;
+  photoLightboxImage.removeAttribute("src");
+  if(photoReturnFocus?.isConnected)photoReturnFocus.focus({preventScroll:true});
+  photoReturnFocus=null;
+}
 
 function dissolveHeart(){
   if(targetKind!=="heartFinal"||heartDissolveAt)return;
@@ -107,16 +128,17 @@ function startMemoryPhotos(){
           card.classList.remove("arriving");card.classList.add("retiring");
           setTimeout(()=>{
             if(run!==photoRun||targetKind!=="heartFinal"||!card.isConnected)return;
-            img.src=url;
+            img.dataset.fullsrc="image/"+encodeURIComponent(file);img.src=url;
             img.decode().then(()=>{
               if(run!==photoRun||targetKind!=="heartFinal"||!card.isConnected)return;
               placeCard(card);memoryPhotos.appendChild(card);card.classList.remove("retiring");
             }).catch(()=>card.remove());
           },800);
         }else{
-          const card=document.createElement("div"),img=document.createElement("img");
+          const card=document.createElement("button"),img=document.createElement("img");
+          card.type="button";card.setAttribute("aria-label","Xem ảnh kỷ niệm toàn màn hình");
           card.className="memory-photo arriving";placeCard(card);
-          img.src=url;img.alt="";img.draggable=false;img.decoding="async";
+          img.dataset.fullsrc="image/"+encodeURIComponent(file);img.src=url;img.alt="";img.draggable=false;img.decoding="async";
           img.onerror=()=>card.remove();card.appendChild(img);memoryPhotos.appendChild(card);
           card.addEventListener("animationend",()=>card.classList.remove("arriving"),{once:true});
         }
@@ -590,12 +612,23 @@ function draw(time) {
 
 const stage=document.getElementById("stage");
 stage.addEventListener("pointerdown",e=>{
+  if(e.target.closest(".memory-photo,.photo-lightbox"))return;
   if(targetKind==="heartFinal"){dissolveHeart();return;}
   const shape=CONFIG.scenes[sceneIndex].shape;
   if(reducedMotion&&shape!=="envelope"&&shape!=="letter"&&sceneIndex<CONFIG.scenes.length-2){showScene(sceneIndex+1);return;}
   burst(e.clientX,e.clientY);
 });
+memoryPhotos.addEventListener("click",e=>{
+  const card=e.target.closest(".memory-photo");
+  if(!card||card.classList.contains("retiring")||memoryPhotos.classList.contains("dissolving"))return;
+  const image=card.querySelector("img");
+  if(image)openMemoryPhoto(image,card);
+});
+closePhotoButton.addEventListener("click",closeMemoryPhoto);
+photoLightbox.addEventListener("click",e=>{if(e.target===photoLightbox)closeMemoryPhoto();});
+window.addEventListener("keydown",e=>{if(e.key==="Escape")closeMemoryPhoto();});
 stage.addEventListener("contextmenu",e=>{
+  if(e.target.closest(".memory-photo,.photo-lightbox"))return;
   if(targetKind!=="heartFinal")return;
   e.preventDefault();
   dissolveHeart();

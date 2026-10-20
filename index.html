@@ -15,7 +15,11 @@
   <main class="stage" id="stage" aria-label="Lời chúc ngày Phụ nữ Việt Nam 20 tháng 10">
     <canvas id="space" aria-hidden="true"></canvas>
     <div class="vignette" aria-hidden="true"></div>
-    <div class="memory-photos" id="memoryPhotos" aria-hidden="true"></div>
+    <div class="memory-photos" id="memoryPhotos" aria-label="Ảnh kỷ niệm"></div>
+    <div class="photo-lightbox" id="photoLightbox" role="dialog" aria-modal="true" aria-label="Ảnh kỷ niệm phóng to" hidden>
+      <button class="photo-lightbox-close" id="closePhoto" type="button" aria-label="Đóng ảnh">×</button>
+      <img id="photoLightboxImage" alt="Ảnh kỷ niệm">
+    </div>
     <section class="message" aria-label="Lời chúc dành cho Vân Anh">
       <p class="eyebrow" id="eyebrow"></p>
       <article class="letter-card" id="letterCard" aria-label="Bức thư chúc mừng 20 tháng 10">

@@ -109,13 +109,18 @@
 .stage.heart-final-scene{background:radial-gradient(ellipse at 50% 50%,rgba(145,15,43,.2),transparent 43%),radial-gradient(ellipse at 50% 52%,#160a16 0,#0d0912 57%,#07070d 100%)}
 .memory-photos{position:absolute;inset:0;z-index:2;overflow:hidden;pointer-events:none}
 .memory-photos.dissolving{opacity:0;transition:opacity 5s ease}
-.memory-photo{position:absolute;left:50%;top:49%;width:clamp(72px,16vw,126px);aspect-ratio:3/4.1;padding:4px;border:1px solid rgba(255,255,255,.9);border-radius:6px;background:#fffaf9;box-shadow:0 12px 35px rgba(0,0,0,.4),0 0 22px rgba(255,111,153,.2);opacity:1;transform:translate(calc(-50% + var(--dx)),calc(-50% + var(--dy))) scale(1) rotate(var(--tilt));transition:opacity 1.8s ease,transform 1.8s ease}
+.memory-photo{position:absolute;left:50%;top:49%;width:clamp(72px,16vw,126px);aspect-ratio:3/4.1;padding:4px;border:1px solid rgba(255,255,255,.9);border-radius:6px;background:#fffaf9;box-shadow:0 12px 35px rgba(0,0,0,.4),0 0 22px rgba(255,111,153,.2);appearance:none;font:inherit;cursor:zoom-in;pointer-events:auto;opacity:1;transform:translate(calc(-50% + var(--dx)),calc(-50% + var(--dy))) scale(1) rotate(var(--tilt));transition:opacity 1.8s ease,transform 1.8s ease}
 .memory-photo.arriving{animation:memory-arrive 2.8s cubic-bezier(.18,.72,.22,1) both}
 .memory-photo.retiring{transition:opacity .75s ease,transform .75s ease;opacity:0;transform:translate(calc(-50% + var(--dx)),calc(-50% + var(--dy) - 2vh)) scale(.88) rotate(var(--tilt))}
 .memory-photo img{display:block;width:100%;height:100%;object-fit:cover;border-radius:3px;background:#f4e9ee}
 @keyframes memory-arrive{0%{opacity:0;transform:translate(-50%,-50%) scale(.14) rotate(0)}34%{opacity:1}100%{opacity:1;transform:translate(calc(-50% + var(--dx)),calc(-50% + var(--dy))) scale(1) rotate(var(--tilt))}}
 @media(max-width:560px){.memory-photo{width:clamp(68px,19vw,88px);padding:3px;border-radius:5px}}
 @media(prefers-reduced-motion:reduce){.memory-photo{animation-duration:12s}}
+.photo-lightbox[hidden]{display:none}
+.photo-lightbox{position:absolute;inset:0;z-index:20;display:grid;place-items:center;padding:max(68px,calc(env(safe-area-inset-top) + 56px)) max(18px,env(safe-area-inset-right)) max(24px,env(safe-area-inset-bottom)) max(18px,env(safe-area-inset-left));background:rgba(5,4,12,.97);cursor:zoom-out}
+.photo-lightbox img{display:block;width:auto;height:auto;max-width:100%;max-height:100%;object-fit:contain;border-radius:4px;box-shadow:0 18px 70px rgba(0,0,0,.5);cursor:default}
+.photo-lightbox-close{position:absolute;top:max(14px,env(safe-area-inset-top));right:max(14px,env(safe-area-inset-right));z-index:1;width:46px;height:46px;border:1px solid rgba(255,240,249,.25);border-radius:50%;background:rgba(255,255,255,.1);color:#fff;font:300 32px/1 system-ui,sans-serif;cursor:pointer;backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px)}
+.photo-lightbox-close:hover{background:rgba(255,255,255,.2)}
 
 /* Persistent navigation, accessible focus and a scrollable letter on compact screens. */
 .topline,.hint,.controls{z-index:5}
