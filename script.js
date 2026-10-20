@@ -32,6 +32,7 @@ const counterEl = document.getElementById("counter");
 const hintEl = document.getElementById("hint");
 const letterCard = document.getElementById("letterCard");
 const envelope = document.getElementById("envelope");
+const memoryPhotos = document.getElementById("memoryPhotos");
 const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 const rand = (min, max) => min + Math.random() * (max - min);
 const particles = [];
@@ -42,6 +43,42 @@ let width = 0, height = 0, dpr = 1, sceneIndex = 0, sceneStarted = 0, lastTime =
 let targets = [], targetKind = "orbit", pointerWave = 0, waveX = 0, waveY = 0, frameCount = 0;
 let heartCenterX = 0, heartCenterY = 0, heartRadiusX = 0, heartRadiusY = 0;
 let advanceTimer = 0, resizeTimer = 0, typingTimer = 0, ambientHeartTimer = 0, opened = false;
+let photoTimer = 0, photoRun = 0, photoFiles = [], photoOrder = [], photoCursor = 0;
+
+function stopMemoryPhotos(){
+  clearTimeout(photoTimer);photoRun++;photoCursor=0;photoOrder.length=0;
+  memoryPhotos.replaceChildren();
+}
+
+function startMemoryPhotos(){
+  const run=++photoRun;
+  fetch("image/manifest.json",{cache:"no-store"})
+    .then(response=>response.ok?response.json():[])
+    .then(files=>{
+      if(run!==photoRun||!Array.isArray(files))return;
+      photoFiles=files.filter(file=>typeof file==="string"&&/\.(jpe?g|png|webp)$/i.test(file));
+      if(!photoFiles.length)return;
+      photoOrder=photoFiles.slice();
+      for(let i=photoOrder.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[photoOrder[i],photoOrder[j]]=[photoOrder[j],photoOrder[i]];}
+      photoCursor=0;
+      const positions=[[-36,-23],[36,-24],[-40,8],[40,8],[-29,29],[29,30],[0,-38],[0,39]];
+      const release=()=>{
+        if(run!==photoRun||targetKind!=="heartFinal")return;
+        if(photoCursor>=photoOrder.length){photoOrder=photoFiles.slice();for(let i=photoOrder.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[photoOrder[i],photoOrder[j]]=[photoOrder[j],photoOrder[i]];}photoCursor=0;}
+        const file=photoOrder[photoCursor++],slot=(photoCursor-1)%positions.length,pos=positions[slot];
+        const card=document.createElement("div"),img=document.createElement("img");
+        card.className="memory-photo";card.style.setProperty("--dx",pos[0]+"vw");card.style.setProperty("--dy",pos[1]+"vh");
+        card.style.setProperty("--tilt",(slot%2?"":"-")+((slot*3)%9+3)+"deg");
+        card.style.setProperty("--flight",(7.2+(slot%3)*.6)+"s");
+        img.src="image/"+encodeURIComponent(file);img.alt="";img.draggable=false;
+        img.onerror=()=>card.remove();card.appendChild(img);memoryPhotos.appendChild(card);
+        card.addEventListener("animationend",()=>card.remove(),{once:true});
+        photoTimer=setTimeout(release,1450+Math.random()*650);
+      };
+      photoTimer=setTimeout(release,1800);
+    })
+    .catch(()=>{});
+}
 
 function resize() {
   const w = window.innerWidth, h = window.innerHeight;
@@ -272,6 +309,7 @@ function setTargets(shape, snap=false) {
 function showScene(index) {
   sceneIndex=Math.max(0,Math.min(index,CONFIG.scenes.length-1));
   const scene=CONFIG.scenes[sceneIndex];
+  stopMemoryPhotos();
   [titleEl,bodyEl,eyebrowEl,signoffEl].forEach(el=>el.classList.remove("visible"));
   const stage=document.getElementById("stage");
   stage.classList.toggle("letter-scene",scene.shape==="letter");
@@ -282,6 +320,7 @@ function showScene(index) {
   envelope.classList.remove("opened");
   titleEl.textContent=scene.title; bodyEl.textContent=""; eyebrowEl.textContent=scene.eyebrow; signoffEl.textContent="";
   setTargets(scene.shape);
+  if(scene.shape==="heartFinal")startMemoryPhotos();
   sceneStarted=performance.now();
   clearTimeout(advanceTimer);
   if(scene.shape==="envelope"){ambientHeartTimer=performance.now()+160;return;}

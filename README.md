@@ -12,6 +12,8 @@ python -m http.server 8000
 
 Sau đó mở [http://localhost:8000](http://localhost:8000). Có thể dùng `npx serve .` nếu đã cài Node.js.
 
+Ở cảnh trái tim cuối, ảnh trong thư mục `image/` được chọn ngẫu nhiên và bay ra lần lượt. Danh sách `image/manifest.json` được tạo từ ảnh hiện có trên máy; toàn bộ thư mục ảnh được `.gitignore` giữ lại local và không được push lên GitHub.
+
 ## Triển khai
 
 ### Vercel
