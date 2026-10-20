@@ -17,7 +17,8 @@ const CONFIG = {
     { eyebrow: "", title: "Anh yêu em", body: "", signoff: "", shape: "love", duration: 4200 },
     { eyebrow: "", title: "Lê Nguyễn Thanh\nVân Anh", body: "", signoff: "", shape: "name", duration: 5200 },
     { eyebrow: "", title: "", body: "", signoff: "", shape: "envelope" },
-    { eyebrow: "", title: "Chúc mừng 20/10", body: "Vân Anh yêu dấu,\n\nChúc em một ngày 20/10 thật hạnh phúc.\nMong em luôn rạng rỡ, bình yên,\nvà được yêu thương thật nhiều —\nhôm nay và mỗi ngày sau đó.\n\nCảm ơn em vì đã làm thế giới của anh\nấm áp và đẹp hơn.", signoff: "Anh yêu em ❤️", shape: "letter" }
+    { eyebrow: "", title: "Chúc mừng 20/10", body: "Vân Anh yêu dấu,\n\nChúc em một ngày 20/10 thật hạnh phúc.\nMong em luôn rạng rỡ, bình yên,\nvà được yêu thương thật nhiều —\nhôm nay và mỗi ngày sau đó.\n\nCảm ơn em vì đã làm thế giới của anh\nấm áp và đẹp hơn.", signoff: "Anh yêu em ❤️", shape: "letter" },
+    { title: "", shape: "bouquet" }
   ]
 };
 
@@ -148,6 +149,62 @@ function makeTargets(shape,targetCount) {
       pts.push({x,y:top+h/2-Math.sin((1-t)*Math.PI)*h*.48,letter:true});
     }
     pts.push(...heartTargets(cx,top+h*.37,Math.min(width,height)*.028,80));
+  } else if(shape === "bouquet") {
+    // A dense, multicolour particle bouquet: six scalloped flower heads, stems, leaves, wrap and ribbon.
+    const unit=Math.min(width,height), centerX=cx, baseY=height*.79;
+    const flowers=[
+      {x:cx-unit*.205,y:height*.39,r:unit*.092,colors:["#ff8eb5","#ffc0d3","#ffe7ef"]},
+      {x:cx-unit*.075,y:height*.31,r:unit*.105,colors:["#bca9ff","#e2c8ff","#fff0fb"]},
+      {x:cx+unit*.075,y:height*.34,r:unit*.098,colors:["#ffd078","#ffe5a8","#fff4d6"]},
+      {x:cx+unit*.205,y:height*.42,r:unit*.086,colors:["#ff799d","#ffb5c8","#ffe5ec"]},
+      {x:cx-unit*.13,y:height*.49,r:unit*.078,colors:["#ff9e7e","#ffd0a5","#fff0d8"]},
+      {x:cx+unit*.125,y:height*.49,r:unit*.08,colors:["#d695ee","#efc5f5","#fff0ff"]}
+    ];
+    for(let f=0;f<flowers.length;f++){
+      const flower=flowers[f],count=220,golden=Math.PI*(3-Math.sqrt(5));
+      for(let i=0;i<count;i++){
+        const a=i*golden,rad=Math.sqrt((i+.5)/count),petal=.72+.28*(.5+.5*Math.cos(a*5));
+        const rr=flower.r*rad*petal;
+        const center=i<count*.11;
+        pts.push({x:flower.x+Math.cos(a)*rr,y:flower.y+Math.sin(a)*rr,color:center?(i%2?"#fff4c5":"#ffda83"):flower.colors[Math.floor((i/count)*flower.colors.length)%flower.colors.length],flower:true,seed:i+f*count});
+      }
+      // Luminous pollen ring around each flower's small golden heart.
+      for(let j=0;j<24;j++){const a=j/24*Math.PI*2;pts.push({x:flower.x+Math.cos(a)*flower.r*.17,y:flower.y+Math.sin(a)*flower.r*.17,color:"#fff3bd",flower:true,seed:j});}
+    }
+    // Stems gather into a hand-tied bundle.
+    for(let stem=0;stem<6;stem++){
+      const flower=flowers[stem],endX=cx+(stem-2.5)*unit*.014,startY=flower.y+flower.r*.58;
+      for(let j=0;j<70;j++){
+        const t=j/69,x=flower.x+(endX-flower.x)*t+Math.sin(t*Math.PI)*((stem-2.5)*unit*.035),y=startY+(baseY-startY)*t;
+        const offset=(Math.random()-.5)*unit*.009;
+        pts.push({x:x+offset,y:y+offset,color:j%7===0?"#a9ddb5":"#78c99a",leaf:true,seed:j});
+      }
+    }
+    // Leaves: filled tapered ellipses tucked between stems and blooms.
+    const leaves=[[-.21,.59,-1],[-.16,.67,1],[-.07,.61,-1],[.08,.65,1],[.17,.59,-1],[.21,.67,1]];
+    for(let l=0;l<leaves.length;l++){
+      const [lx,ly,dir]=leaves[l],ax=cx+lx*unit,ay=height*ly,leafLen=unit*.085,leafWid=unit*.024;
+      for(let j=0;j<68;j++){
+        const t=j/67,a=(j*2.399963)% (Math.PI*2),rr=Math.sqrt(t),along=rr*Math.cos(a)*leafLen,across=rr*Math.sin(a)*leafWid*(1-Math.abs(along)/leafLen);
+        pts.push({x:ax+along*dir+across*.5,y:ay-along*.55+across,color:j%5===0?"#b8e5a8":"#63ba82",leaf:true,seed:j});
+      }
+    }
+    // Delicate dotted wrapping paper and a dimensional bow.
+    const wrapTop=height*.665,wrapBottom=baseY;
+    for(let i=0;i<200;i++){
+      const t=i/199,y=wrapTop+(wrapBottom-wrapTop)*t,half=unit*(.025+.115*t);
+      for(let side=-1;side<=1;side+=2){const x=cx+side*half;pts.push({x,y,color:i%4===0?"#ffe6f0":"#df9ebc",wrap:true,seed:i});}
+    }
+    for(let i=0;i<100;i++){
+      const t=i/99,a=t*Math.PI*2,x=cx+Math.cos(a)*unit*.078,y=height*.67+Math.sin(a)*unit*.035;
+      pts.push({x,y,color:i%3===0?"#ffe4a5":"#f4b2cc",ribbon:true,seed:i});
+      pts.push({x:cx+(t-.5)*unit*.018,y:height*.67+Math.sin(t*Math.PI)*unit*.105,color:i%3===0?"#ffe4a5":"#f4b2cc",ribbon:true,seed:i});
+    }
+    // A few floating sparkles frame the bouquet without crowding the flowers.
+    for(let i=0;i<50;i++){
+      const a=i*2.399963,r=unit*(.26+((i*37)%100)/100*.08);
+      pts.push({x:cx+Math.cos(a)*r,y:height*.43+Math.sin(a)*r*.85,color:i%2?"#ffd7ed":"#fff0be",spark:true,seed:i});
+    }
   } else if(shape === "envelope") {
     const cx2=width*.5,cy2=height*.56,w=Math.min(width*.68,360),h=Math.min(height*.24,150);
     for(let i=0;i<220;i++){
@@ -242,7 +299,7 @@ function orbitalTextTargets(text,cx,cy,radius,tilt,fontSize,band){
 
 function setTargets(shape, snap=false) {
   const isTextShape=shape==="love"||shape==="name"||shape==="particleText";
-  let count=shape==="planet"?Math.round(Math.min(2600,Math.max(1350,width*height/175))*CONFIG.particleScale):shape==="particleText"?Math.round(Math.min(1600,Math.max(950,width*height/280))*CONFIG.particleScale):Math.round(Math.min(isTextShape?1600:1250,Math.max(isTextShape?850:500,width*height/(isTextShape?360:520)))*CONFIG.particleScale);
+  let count=shape==="planet"?Math.round(Math.min(2600,Math.max(1350,width*height/175))*CONFIG.particleScale):shape==="bouquet"?Math.round(Math.min(3000,Math.max(1800,width*height/145))*CONFIG.particleScale):shape==="particleText"?Math.round(Math.min(1600,Math.max(950,width*height/280))*CONFIG.particleScale):Math.round(Math.min(isTextShape?1600:1250,Math.max(isTextShape?850:500,width*height/(isTextShape?360:520)))*CONFIG.particleScale);
   targetKind=shape; targets=makeTargets(shape,count);
   if(shape==="particleText"&&targets.length<count)count=targets.length;
   else count=Math.max(count,targets.length);
@@ -256,7 +313,7 @@ function setTargets(shape, snap=false) {
   const len=targets.length;
   for(let i=0;i<particles.length;i++){
     const p=particles[i];
-    if(len){const t=targets[i%len];p.tx=t.x;p.ty=t.y;p.baseX=t.baseX===undefined?t.x:t.baseX;p.baseY=t.baseY===undefined?t.y:t.baseY;p.orbitBand=t.orbitBand;p.orbitAngle=t.orbitAngle;p.orbitNormal=t.orbitNormal;p.orbitRadius=t.orbitRadius;p.orbitTilt=t.orbitTilt;p.headline=!!t.headline;p.heart=!!t.heart;p.globe=!!t.globe;p.sx=t.sx;p.sy=t.sy;p.sz=t.sz;p.globeRadius=t.radius;p.globeSeed=t.seed;}
+    if(len){const t=targets[i%len];p.tx=t.x;p.ty=t.y;p.baseX=t.baseX===undefined?t.x:t.baseX;p.baseY=t.baseY===undefined?t.y:t.baseY;p.orbitBand=t.orbitBand;p.orbitAngle=t.orbitAngle;p.orbitNormal=t.orbitNormal;p.orbitRadius=t.orbitRadius;p.orbitTilt=t.orbitTilt;p.headline=!!t.headline;p.heart=!!t.heart;p.globe=!!t.globe;p.flower=!!t.flower;p.leaf=!!t.leaf;p.wrap=!!t.wrap;p.ribbon=!!t.ribbon;p.spark=!!t.spark;p.color=t.color||"";p.sx=t.sx;p.sy=t.sy;p.sz=t.sz;p.globeRadius=t.radius;p.globeSeed=t.seed;}
     else {p.tx=width/2;p.ty=height/2;}
     if(snap){p.x=p.tx+rand(-40,40);p.y=p.ty+rand(-40,40);p.vx=0;p.vy=0;}
     p.sceneTx=p.tx;p.sceneTy=p.ty;
@@ -270,6 +327,7 @@ function showScene(index) {
   const stage=document.getElementById("stage");
   stage.classList.toggle("letter-scene",scene.shape==="letter");
   stage.classList.toggle("envelope-scene",scene.shape==="envelope");
+  stage.classList.toggle("bouquet-scene",scene.shape==="bouquet");
   letterCard.classList.remove("open");
   envelope.hidden=scene.shape!=="envelope";
   envelope.classList.remove("opened");
@@ -287,14 +345,15 @@ function showScene(index) {
 function openLetter(){
   if(opened)return;
   opened=true;clearTimeout(advanceTimer);
-  showScene(CONFIG.scenes.length-1);
+  const letterIndex=CONFIG.scenes.length-2;
+  showScene(letterIndex);
   envelope.classList.add("opened");
   letterCard.classList.add("open");
-  const finalScene=CONFIG.scenes[CONFIG.scenes.length-1];
+  const finalScene=CONFIG.scenes[letterIndex];
   let i=0;
   bodyEl.textContent="";bodyEl.classList.add("visible");signoffEl.textContent="";signoffEl.classList.add("visible");
   const typeNext=()=>{
-    if(i>=finalScene.body.length){signoffEl.textContent=finalScene.signoff;return;}
+    if(i>=finalScene.body.length){signoffEl.textContent=finalScene.signoff;advanceTimer=setTimeout(()=>showScene(CONFIG.scenes.length-1),4200);return;}
     bodyEl.textContent=finalScene.body.slice(0,++i);
     typingTimer=setTimeout(typeNext,finalScene.body[i-1]==="\n"?320:48);
   };
@@ -432,6 +491,10 @@ function draw(time) {
     if(textShape){
       ox+=Math.sin(time*.00036)*1.4+Math.sin(time*.00105+p.drift)*.72;
       oy+=Math.cos(time*.00032)*1.1+Math.cos(time*.00088+p.drift)*.62;
+    } else if(targetKind==="bouquet"){
+      const sway=Math.sin(time*.00048+p.drift*.08);
+      ox+=sway*(p.flower?1.35:p.leaf?2.1:.9)+Math.sin(time*.0012+p.phase)*.48;
+      oy+=Math.cos(time*.00042+p.drift*.06)*(p.leaf?1.1:.65)+Math.sin(time*.0009+p.phase)*.35;
     } else {
       const wobble=targetKind==="planet"?.32:.45;
       ox+=Math.sin(time*.00042+p.drift*.12)*wobble;
@@ -463,9 +526,9 @@ function draw(time) {
     const globePoint=targetKind==="planet"&&p.globe;
     if(globePoint)depthAlpha=.13+.87*Math.max(0,(p.globeDepth+1)*.5);
     ctx.globalAlpha=globePoint?depthAlpha*(.7+.3*twinkle):(crispText?.98:p.alpha)*twinkle*depthAlpha;
-    ctx.fillStyle=globePoint?(p.globeDepth>.48?"#fffaff":p.globeDepth>-.18?"#ffc9f0":"#876aab"):p.heart?(p.hue<.68?"#ff9fcf":"#ffd8eb"):headlineParticle?"#ffffff":textScene?(p.hue<.24?"#fff4f9":p.hue<.5?"#ffd0e4":p.hue<.76?"#fff0c9":"#f5edff"):glow;
+    ctx.fillStyle=targetKind==="bouquet"?(p.color||"#ffd5e7"):globePoint?(p.globeDepth>.48?"#fffaff":p.globeDepth>-.18?"#ffc9f0":"#876aab"):p.heart?(p.hue<.68?"#ff9fcf":"#ffd8eb"):headlineParticle?"#ffffff":textScene?(p.hue<.24?"#fff4f9":p.hue<.5?"#ffd0e4":p.hue<.76?"#fff0c9":"#f5edff"):glow;
     ctx.shadowBlur=0;
-    const pointSize=globePoint?(1.1+(p.globeSeed%7)*.12)*(p.globeDepth>.25?1.08:.82):p.heart?1.25+p.hue*.3:textShape?1.35+(p.hue*.28):p.r*(headlineParticle?1.45:p.halo?.7:1)*(crispText?1.12:(.78+.22*twinkle));
+    const pointSize=targetKind==="bouquet"?(p.flower?1.65+(p.seed%4)*.13:p.ribbon?1.45:p.spark?1.15:p.r*.95):globePoint?(1.1+(p.globeSeed%7)*.12)*(p.globeDepth>.25?1.08:.82):p.heart?1.25+p.hue*.3:textShape?1.35+(p.hue*.28):p.r*(headlineParticle?1.45:p.halo?.7:1)*(crispText?1.12:(.78+.22*twinkle));
     ctx.beginPath();ctx.arc(p.x,p.y,pointSize,0,6.283);ctx.fill();
   }
   ctx.globalAlpha=1;ctx.shadowBlur=0;

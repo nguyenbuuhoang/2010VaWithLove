@@ -117,3 +117,6 @@
 .letter-scene .letter-card>.message-body,
 .letter-scene .letter-card>.signoff{position:relative;z-index:1}
 @media(max-width:560px){.letter-scene .doodle-flower{font-size:16px}.letter-scene .flower-b{font-size:19px}.letter-scene .doodle-heart.watermark{font-size:60px}}
+
+/* The final particle bouquet sits in a soft rose-garden glow. */
+.stage.bouquet-scene{background:radial-gradient(ellipse at 50% 57%,rgba(189,87,145,.2),transparent 35%),radial-gradient(ellipse at 18% 80%,rgba(75,128,120,.12),transparent 36%),radial-gradient(ellipse at 80% 20%,rgba(139,94,174,.13),transparent 32%),linear-gradient(145deg,#080711,#170d1d 52%,#080811)}
