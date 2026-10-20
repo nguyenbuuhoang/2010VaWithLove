@@ -94,25 +94,36 @@ function startMemoryPhotos(){
       photoOrder=photoFiles.slice();
       for(let i=photoOrder.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[photoOrder[i],photoOrder[j]]=[photoOrder[j],photoOrder[i]];}
       photoCursor=0;
-      const positions=[[-35,-27],[35,-27],[-39,0],[39,0],[-31,28],[31,28],[-14,-39],[14,-39],[-14,39],[14,39]];
+      const positions=[[-34,-25],[34,-25],[-39,8],[39,8],[0,36]];
       const release=()=>{
         if(run!==photoRun||targetKind!=="heartFinal")return;
         if(photoCursor>=photoOrder.length){photoOrder=photoFiles.slice();for(let i=photoOrder.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[photoOrder[i],photoOrder[j]]=[photoOrder[j],photoOrder[i]];}photoCursor=0;}
         const file=photoOrder[photoCursor++],slot=(photoCursor-1)%positions.length,pos=positions[slot];
-        const active=memoryPhotos.querySelectorAll(".memory-photo:not(.retiring)");
-        if(active.length>=10){
-          const oldest=active[0];oldest.classList.add("retiring");
-          setTimeout(()=>oldest.remove(),1900);
-        }
-        const card=document.createElement("div"),img=document.createElement("img");
-        card.className="memory-photo";card.style.setProperty("--dx",pos[0]+"vw");card.style.setProperty("--dy",pos[1]+"vh");
-        card.style.setProperty("--tilt",(slot%2?"":"-")+((slot*3)%9+3)+"deg");
-        card.classList.add("arriving");
         const thumbnail=file.replace(/\.[^.]+$/,".webp");
-        img.src="image/thumbs/"+encodeURIComponent(thumbnail);img.alt="";img.draggable=false;img.decoding="async";
-        img.onerror=()=>card.remove();card.appendChild(img);memoryPhotos.appendChild(card);
-        card.addEventListener("animationend",()=>card.classList.remove("arriving"),{once:true});
-        photoTimer=setTimeout(release,1050);
+        const url="image/thumbs/"+encodeURIComponent(thumbnail);
+        const placeCard=(card)=>{
+          card.style.setProperty("--dx",pos[0]+"vw");card.style.setProperty("--dy",pos[1]+"vh");
+          card.style.setProperty("--tilt",(slot%2?"":"-")+((slot*3)%9+3)+"deg");
+        };
+        if(memoryPhotos.childElementCount>=5){
+          const card=memoryPhotos.firstElementChild,img=card.querySelector("img");
+          card.classList.remove("arriving");card.classList.add("retiring");
+          setTimeout(()=>{
+            if(run!==photoRun||targetKind!=="heartFinal"||!card.isConnected)return;
+            img.src=url;
+            img.decode().then(()=>{
+              if(run!==photoRun||targetKind!=="heartFinal"||!card.isConnected)return;
+              placeCard(card);memoryPhotos.appendChild(card);card.classList.remove("retiring");
+            }).catch(()=>card.remove());
+          },800);
+        }else{
+          const card=document.createElement("div"),img=document.createElement("img");
+          card.className="memory-photo arriving";placeCard(card);
+          img.src=url;img.alt="";img.draggable=false;img.decoding="async";
+          img.onerror=()=>card.remove();card.appendChild(img);memoryPhotos.appendChild(card);
+          card.addEventListener("animationend",()=>card.classList.remove("arriving"),{once:true});
+        }
+        photoTimer=setTimeout(release,2400);
       };
       photoTimer=setTimeout(release,1800);
     })
