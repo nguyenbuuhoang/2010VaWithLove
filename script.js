@@ -29,17 +29,12 @@ const titleEl = document.getElementById("messageTitle");
 const bodyEl = document.getElementById("messageBody");
 const eyebrowEl = document.getElementById("eyebrow");
 const signoffEl = document.getElementById("signoff");
-const counterEl = document.getElementById("counter");
 const hintEl = document.getElementById("hint");
 const hintTextEl = document.getElementById("hintText");
 const letterCard = document.getElementById("letterCard");
 const envelope = document.getElementById("envelope");
 const memoryPhotos = document.getElementById("memoryPhotos");
 const continueLetter = document.getElementById("continueLetter");
-const replayButton = document.getElementById("replayButton");
-const nextButton = document.getElementById("nextButton");
-const totalScenesEl = document.getElementById("totalScenes");
-const controls = document.getElementById("controls");
 const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 const rand = (min, max) => min + Math.random() * (max - min);
 const particles = [];
@@ -51,16 +46,18 @@ let targets = [], targetKind = "orbit", pointerWave = 0, waveX = 0, waveY = 0;
 let heartCenterX = 0, heartCenterY = 0, heartRadiusX = 0, heartRadiusY = 0;
 let advanceTimer = 0, resizeTimer = 0, typingTimer = 0, ambientHeartTimer = 0, relationshipTimer = 0, opened = false;
 let photoTimer = 0, photoRun = 0, photoFiles = [], photoOrder = [], photoCursor = 0;
-let heartDissolveAt = 0;
+let heartDissolveAt = 0, heartDissolveTimer = 0;
 
 function dissolveHeart(){
   if(targetKind!=="heartFinal"||heartDissolveAt)return;
   heartDissolveAt=performance.now();
   clearTimeout(photoTimer);photoRun++;
   memoryPhotos.classList.add("dissolving");
-  setTimeout(()=>{
+  clearTimeout(heartDissolveTimer);
+  heartDissolveTimer=setTimeout(()=>{
     memoryPhotos.replaceChildren();memoryPhotos.classList.remove("dissolving");
     heartDissolveAt=0;
+    if(targetKind==="heartFinal")startMemoryPhotos();
   },5200);
 }
 
@@ -328,6 +325,7 @@ function showScene(index) {
   sceneIndex=Math.max(0,Math.min(index,CONFIG.scenes.length-1));
   const scene=CONFIG.scenes[sceneIndex];
   clearTimeout(typingTimer);typingTimer=0;
+  clearTimeout(heartDissolveTimer);heartDissolveTimer=0;
   heartDissolveAt=0;
   clearInterval(relationshipTimer);relationshipTimer=0;
   continueLetter.hidden=true;continueLetter.disabled=false;continueLetter.classList.remove("visible");
@@ -343,9 +341,6 @@ function showScene(index) {
   envelope.classList.remove("opened");
   titleEl.textContent=scene.title; bodyEl.textContent=""; eyebrowEl.textContent=scene.eyebrow; signoffEl.textContent="";
   setTargets(scene.shape,reducedMotion);
-  counterEl.textContent=String(sceneIndex+1).padStart(2,"0");
-  totalScenesEl.textContent=String(CONFIG.scenes.length).padStart(2,"0");
-  nextButton.hidden=scene.shape==="envelope"||scene.shape==="letter"||scene.shape==="heartFinal";
   const hints={
     planet:"Chạm màn hình để tạo gợn sáng",
     particleText:"Một lời nhắn nhỏ đang được gửi đến em",
@@ -357,7 +352,7 @@ function showScene(index) {
   };
   const manualScene=scene.shape==="envelope"||scene.shape==="letter"||scene.shape==="heartFinal";
   hintTextEl.textContent=reducedMotion&&!manualScene
-    ?"Đang bật giảm chuyển động · nhấn Tiếp để xem tiếp"
+    ?"Giảm chuyển động · chạm để chuyển cảnh"
     :(hints[scene.shape]||"Chạm màn hình để tạo gợn sáng");
   hintEl.hidden=false;
   if(scene.shape==="heartFinal")startMemoryPhotos();
@@ -596,6 +591,8 @@ function draw(time) {
 const stage=document.getElementById("stage");
 stage.addEventListener("pointerdown",e=>{
   if(targetKind==="heartFinal"){dissolveHeart();return;}
+  const shape=CONFIG.scenes[sceneIndex].shape;
+  if(reducedMotion&&shape!=="envelope"&&shape!=="letter"&&sceneIndex<CONFIG.scenes.length-2){showScene(sceneIndex+1);return;}
   burst(e.clientX,e.clientY);
 });
 stage.addEventListener("contextmenu",e=>{
@@ -603,19 +600,12 @@ stage.addEventListener("contextmenu",e=>{
   e.preventDefault();
   dissolveHeart();
 });
-controls.addEventListener("pointerdown",e=>e.stopPropagation());
 envelope.addEventListener("click",openLetter);
 continueLetter.addEventListener("click",()=>{
   if(continueLetter.disabled)return;
   continueLetter.disabled=true;
   letterCard.classList.add("leaving");
   setTimeout(()=>showScene(CONFIG.scenes.length-1),900);
-});
-nextButton.addEventListener("click",()=>showScene(sceneIndex+1));
-replayButton.addEventListener("click",()=>{
-  opened=false;
-  clearTimeout(typingTimer);clearInterval(relationshipTimer);relationshipTimer=0;
-  showScene(0);
 });
 window.addEventListener("resize",()=>{clearTimeout(resizeTimer);resizeTimer=setTimeout(resize,120);});
 resize();

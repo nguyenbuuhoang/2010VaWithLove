@@ -24,9 +24,8 @@ Import repository, chọn **Other** làm framework preset, để trống build c
 
 ## Điều khiển
 
-- Các cảnh mở đầu tự chạy; nút **Tiếp** cho phép chuyển cảnh sớm.
+- Các cảnh mở đầu tự chạy; khi bật giảm chuyển động, chạm màn hình để chuyển cảnh.
 - Phong thư và nút **Nhấn để tiếp tục** điều khiển phần mở và kết thúc lá thư.
-- **Phát lại** khởi động thiệp từ đầu.
 - Ở cảnh cuối, click để hạt tim tỏa ra rồi kết lại.
 - Khi thiết bị bật giảm chuyển động, cảnh dừng tự chuyển và dùng nút điều khiển để tiếp tục.
 
