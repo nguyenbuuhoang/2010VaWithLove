@@ -16,7 +16,7 @@ Mở `http://localhost:8000`. Để xem trên điện thoại cùng mạng Wi-Fi
 
 ### GitHub Pages
 
-Repository đã có mã nguồn và ảnh trong thư mục `image/`. Vào **Settings → Pages**, chọn **Deploy from a branch**, nhánh `main`, thư mục `/ (root)`, rồi lưu. Trang sẽ được phục vụ từ `index.html`.
+Repository có ảnh gốc trong `image/` và 151 ảnh WebP nhẹ trong `image/thumbs/` để hiệu ứng ảnh bay tải nhanh trên điện thoại. Vào **Settings → Pages**, chọn **Deploy from a branch**, nhánh `main`, thư mục `/ (root)`, rồi lưu. Trang sẽ được phục vụ từ `index.html`.
 
 ### Vercel
 

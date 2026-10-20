@@ -85,7 +85,7 @@ function updateRelationshipClock(){
 
 function startMemoryPhotos(){
   const run=++photoRun;
-  fetch("image/manifest.json",{cache:"no-store"})
+  fetch("image/manifest.json")
     .then(response=>response.ok?response.json():[])
     .then(files=>{
       if(run!==photoRun||!Array.isArray(files))return;
@@ -108,7 +108,8 @@ function startMemoryPhotos(){
         card.className="memory-photo";card.style.setProperty("--dx",pos[0]+"vw");card.style.setProperty("--dy",pos[1]+"vh");
         card.style.setProperty("--tilt",(slot%2?"":"-")+((slot*3)%9+3)+"deg");
         card.classList.add("arriving");
-        img.src="image/"+encodeURIComponent(file);img.alt="";img.draggable=false;
+        const thumbnail=file.replace(/\.[^.]+$/,".webp");
+        img.src="image/thumbs/"+encodeURIComponent(thumbnail);img.alt="";img.draggable=false;img.decoding="async";
         img.onerror=()=>card.remove();card.appendChild(img);memoryPhotos.appendChild(card);
         card.addEventListener("animationend",()=>card.classList.remove("arriving"),{once:true});
         photoTimer=setTimeout(release,1050);
