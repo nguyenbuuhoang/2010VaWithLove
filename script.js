@@ -463,20 +463,44 @@ function drawScenePulse(time){
   ctx.globalAlpha=1;
 }
 
-function drawRomanticEffects(time){
-  if(targetKind!=="love"&&targetKind!=="name")return;
+function heartOrbitPoint(index,time){
   const rotation=time*.00016,rx=heartRadiusX*1.48,ry=heartRadiusY*1.55;
+  const angle=time*.00032+index*Math.PI/3,x=Math.cos(angle)*rx,y=Math.sin(angle)*ry;
+  return {x:heartCenterX+x*Math.cos(rotation)-y*Math.sin(rotation),y:heartCenterY+x*Math.sin(rotation)+y*Math.cos(rotation)+Math.sin(time*.002+index)*2};
+}
+
+function isHeartIconHit(x,y,time){
+  if(targetKind==="love"||targetKind==="name"||targetKind==="heartFinal"){
+    for(let i=0;i<6;i++){
+      const point=heartOrbitPoint(i,time),dx=x-point.x,dy=y-point.y;
+      if(dx*dx+dy*dy<24*24)return true;
+    }
+  }
+  // Click generated heart glyphs too; ignore the sparkle glyph every third slot.
+  for(let i=hearts.length-1;i>=0;i--){
+    if(i%3===0)continue;
+    const heart=hearts[i],dx=x-heart.x,dy=y-heart.y;
+    if(dx*dx+dy*dy<20*20)return true;
+  }
+  return false;
+}
+
+function drawRomanticEffects(time,fade=0){
+  if(targetKind!=="love"&&targetKind!=="name"&&targetKind!=="heartFinal")return;
+  const rotation=time*.00016,rx=heartRadiusX*1.48,ry=heartRadiusY*1.55;
+  ctx.globalAlpha=1-fade;
   ctx.save();ctx.translate(heartCenterX,heartCenterY);ctx.rotate(rotation);
   ctx.beginPath();ctx.ellipse(0,0,rx,ry,0,0,Math.PI*2);
   ctx.strokeStyle="rgba(255,190,226,.2)";ctx.lineWidth=.8;ctx.stroke();
+  ctx.restore();
   for(let i=0;i<6;i++){
-    const a=time*.00032+i*Math.PI/3,x=Math.cos(a)*rx,y=Math.sin(a)*ry;
-    ctx.globalAlpha=.42+.28*(.5+.5*Math.sin(time*.002+i));
+    const point=heartOrbitPoint(i,time);
+    ctx.globalAlpha=(.42+.28*(.5+.5*Math.sin(time*.002+i)))*(1-fade);
     ctx.fillStyle=i%2?"#ffb7da":"#ffe4f3";
-    ctx.font=(8+i%3*2)+"px Georgia,serif";ctx.textAlign="center";ctx.textBaseline="middle";
-    ctx.fillText("♥",x,y+Math.sin(time*.002+i)*2);
+    ctx.font=(targetKind==="heartFinal"?"15":8+i%3*2)+"px Georgia,serif";ctx.textAlign="center";ctx.textBaseline="middle";
+    ctx.fillText("♥",point.x,point.y);
   }
-  ctx.restore();ctx.globalAlpha=1;
+  ctx.globalAlpha=1;
 }
 
 function drawHeartAura(time,fade=0){
@@ -575,7 +599,7 @@ function draw(time) {
   }
   ctx.globalAlpha=1;ctx.shadowBlur=0;
   if(targetKind!=="planet")drawPlanet(time);
-  drawRomanticEffects(time);
+  drawRomanticEffects(time,heartFade);
   if(targetKind==="envelope"&&time>=ambientHeartTimer&&hearts.length<28){
     hearts.push({x:rand(width*.05,width*.95),y:rand(height*.18,height*.8),vx:rand(-.12,.12),vy:rand(-.62,-.25),life:1.25,phase:rand(0,6)});
     ambientHeartTimer=time+rand(260,460);
@@ -588,9 +612,12 @@ function draw(time) {
 
 
 const stage=document.getElementById("stage");
-stage.addEventListener("pointerdown",e=>{if(targetKind==="heartFinal"){dissolveHeart();return;}burst(e.clientX,e.clientY);});
+stage.addEventListener("pointerdown",e=>{
+  if(targetKind==="heartFinal"&&isHeartIconHit(e.clientX,e.clientY,performance.now())){dissolveHeart();return;}
+  burst(e.clientX,e.clientY);
+});
 stage.addEventListener("contextmenu",e=>{
-  if(targetKind!=="heartFinal")return;
+  if(targetKind!=="heartFinal"||!isHeartIconHit(e.clientX,e.clientY,performance.now()))return;
   e.preventDefault();
   dissolveHeart();
 });
