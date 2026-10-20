@@ -98,5 +98,5 @@
 .letter-scene .signoff{font-family:"Segoe Script","Segoe Print","Comic Sans MS",cursive}
 .letter-scene .message-body{font-family:"Segoe Print","Segoe Script","Comic Sans MS",cursive}
 
-/* The final particle bouquet sits in a soft rose-garden glow. */
-.stage.bouquet-scene{background:radial-gradient(ellipse at 50% 57%,rgba(189,87,145,.2),transparent 35%),radial-gradient(ellipse at 18% 80%,rgba(75,128,120,.12),transparent 36%),radial-gradient(ellipse at 80% 20%,rgba(139,94,174,.13),transparent 32%),linear-gradient(145deg,#080711,#170d1d 52%,#080811)}
+/* A quiet ruby glow gives the particle heart room to stand out. */
+.stage.heart-final-scene{background:radial-gradient(ellipse at 50% 50%,rgba(145,15,43,.2),transparent 43%),radial-gradient(ellipse at 50% 52%,#160a16 0,#0d0912 57%,#07070d 100%)}

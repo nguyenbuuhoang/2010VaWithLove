@@ -18,7 +18,7 @@ const CONFIG = {
     { eyebrow: "", title: "Lê Nguyễn Thanh\nVân Anh", body: "", signoff: "", shape: "name", duration: 5200 },
     { eyebrow: "", title: "", body: "", signoff: "", shape: "envelope" },
     { eyebrow: "", title: "Chúc mừng 20/10", body: "Vân Anh yêu dấu,\n\nChúc em một ngày 20/10 thật hạnh phúc.\nMong em luôn rạng rỡ, bình yên,\nvà được yêu thương thật nhiều —\nhôm nay và mỗi ngày sau đó.\n\nCảm ơn em vì đã làm thế giới của anh\nấm áp và đẹp hơn.", signoff: "Anh yêu em ❤️", shape: "letter" },
-    { title: "", shape: "bouquet" }
+    { title: "", shape: "heartFinal" }
   ]
 };
 
@@ -149,65 +149,14 @@ function makeTargets(shape,targetCount) {
       pts.push({x,y:top+h/2-Math.sin((1-t)*Math.PI)*h*.48,letter:true});
     }
     pts.push(...heartTargets(cx,top+h*.37,Math.min(width,height)*.028,80));
-  } else if(shape === "bouquet") {
-    // A dense, multicolour particle bouquet: six scalloped flower heads, stems, leaves, wrap and ribbon.
-    const unit=Math.min(width,height), centerX=cx, baseY=height*.79;
-    const flowers=[
-      {x:cx-unit*.205,y:height*.39,r:unit*.092,colors:["#ff8eb5","#ffc0d3","#ffe7ef"]},
-      {x:cx-unit*.075,y:height*.31,r:unit*.105,colors:["#bca9ff","#e2c8ff","#fff0fb"]},
-      {x:cx+unit*.075,y:height*.34,r:unit*.098,colors:["#ffd078","#ffe5a8","#fff4d6"]},
-      {x:cx+unit*.205,y:height*.42,r:unit*.086,colors:["#ff799d","#ffb5c8","#ffe5ec"]},
-      {x:cx-unit*.13,y:height*.49,r:unit*.078,colors:["#ff9e7e","#ffd0a5","#fff0d8"]},
-      {x:cx+unit*.125,y:height*.49,r:unit*.08,colors:["#d695ee","#efc5f5","#fff0ff"]}
-    ];
-    for(let f=0;f<flowers.length;f++){
-      const flower=flowers[f],golden=Math.PI*(3-Math.sqrt(5));
-      // Five overlapping filled petal lobes create a recognizable daisy/rose silhouette.
-      for(let petal=0;petal<5;petal++){
-        const angle=petal*Math.PI*2/5-Math.PI/2,pcx=flower.x+Math.cos(angle)*flower.r*.34,pcy=flower.y+Math.sin(angle)*flower.r*.34;
-        for(let i=0;i<44;i++){
-          const a=i*golden,rad=Math.sqrt((i+.5)/44)*flower.r*.62;
-          const shade=flower.colors[Math.min(flower.colors.length-1,Math.floor((i/44)*flower.colors.length))];
-          pts.push({x:pcx+Math.cos(a)*rad,y:pcy+Math.sin(a)*rad,color:shade,flower:true,seed:i+petal*44});
-        }
-      }
-      for(let i=0;i<55;i++){const a=i*golden,rr=Math.sqrt((i+.5)/55)*flower.r*.29;pts.push({x:flower.x+Math.cos(a)*rr,y:flower.y+Math.sin(a)*rr,color:i%4===0?"#fff4c5":"#ffda83",flower:true,seed:i});}
-      // Luminous pollen ring around each flower's small golden heart.
-      for(let j=0;j<24;j++){const a=j/24*Math.PI*2;pts.push({x:flower.x+Math.cos(a)*flower.r*.17,y:flower.y+Math.sin(a)*flower.r*.17,color:"#fff3bd",flower:true,seed:j});}
-    }
-    // Stems gather into a hand-tied bundle.
-    for(let stem=0;stem<6;stem++){
-      const flower=flowers[stem],endX=cx+(stem-2.5)*unit*.014,startY=flower.y+flower.r*.58;
-      for(let j=0;j<70;j++){
-        const t=j/69,x=flower.x+(endX-flower.x)*t+Math.sin(t*Math.PI)*((stem-2.5)*unit*.035),y=startY+(baseY-startY)*t;
-        const offset=(Math.random()-.5)*unit*.009;
-        pts.push({x:x+offset,y:y+offset,color:j%7===0?"#a9ddb5":"#78c99a",leaf:true,seed:j});
-      }
-    }
-    // Leaves: filled tapered ellipses tucked between stems and blooms.
-    const leaves=[[-.21,.59,-1],[-.16,.67,1],[-.07,.61,-1],[.08,.65,1],[.17,.59,-1],[.21,.67,1]];
-    for(let l=0;l<leaves.length;l++){
-      const [lx,ly,dir]=leaves[l],ax=cx+lx*unit,ay=height*ly,leafLen=unit*.085,leafWid=unit*.024;
-      for(let j=0;j<68;j++){
-        const t=j/67,a=(j*2.399963)% (Math.PI*2),rr=Math.sqrt(t),along=rr*Math.cos(a)*leafLen,across=rr*Math.sin(a)*leafWid*(1-Math.abs(along)/leafLen);
-        pts.push({x:ax+along*dir+across*.5,y:ay-along*.55+across,color:j%5===0?"#b8e5a8":"#63ba82",leaf:true,seed:j});
-      }
-    }
-    // Delicate dotted wrapping paper and a dimensional bow.
-    const wrapTop=height*.665,wrapBottom=baseY;
-    for(let i=0;i<200;i++){
-      const t=i/199,y=wrapTop+(wrapBottom-wrapTop)*t,half=unit*(.025+.115*t);
-      for(let side=-1;side<=1;side+=2){const x=cx+side*half;pts.push({x,y,color:i%4===0?"#ffe6f0":"#df9ebc",wrap:true,seed:i});}
-    }
-    for(let i=0;i<100;i++){
-      const t=i/99,a=t*Math.PI*2,x=cx+Math.cos(a)*unit*.078,y=height*.67+Math.sin(a)*unit*.035;
-      pts.push({x,y,color:i%3===0?"#ffe4a5":"#f4b2cc",ribbon:true,seed:i});
-      pts.push({x:cx+(t-.5)*unit*.018,y:height*.67+Math.sin(t*Math.PI)*unit*.105,color:i%3===0?"#ffe4a5":"#f4b2cc",ribbon:true,seed:i});
-    }
-    // A few floating sparkles frame the bouquet without crowding the flowers.
-    for(let i=0;i<50;i++){
-      const a=i*2.399963,r=unit*(.26+((i*37)%100)/100*.08);
-      pts.push({x:cx+Math.cos(a)*r,y:height*.43+Math.sin(a)*r*.85,color:i%2?"#ffd7ed":"#fff0be",spark:true,seed:i});
+  } else if(shape === "heartFinal") {
+    // Large, filled ruby heart made only from orbiting and breathing points.
+    const unit=Math.min(width,height),scale=unit*.39;
+    pts=heartTargets(cx,height*.49,scale,1550,2,Math.max(2.8,unit/145));
+    for(let i=0;i<pts.length;i++){
+      const point=pts[i],nx=(point.x-cx)/(scale*.9),ny=(height*.49-point.y)/(scale*.9);
+      const highlight=Math.max(0,1-Math.hypot((nx+.38)*1.55,(ny-.42)*1.35));
+      point.color=highlight>.38?"#ffd7e4":highlight>.12?"#ff829f":(i%7===0?"#ff687f":"#f52e55");
     }
   } else if(shape === "envelope") {
     const cx2=width*.5,cy2=height*.56,w=Math.min(width*.68,360),h=Math.min(height*.24,150);
@@ -240,7 +189,7 @@ function makeTargets(shape,targetCount) {
   return pts;
 }
 
-function heartTargets(cx,cy,scale,count,layers=1){
+function heartTargets(cx,cy,scale,count,layers=1,minSpacing=1.7){
   const out=[],wanted=Math.max(1,count*layers),boundary=[];
   let minY=Infinity,maxY=-Infinity;
   for(let i=0;i<160;i++){
@@ -251,7 +200,7 @@ function heartTargets(cx,cy,scale,count,layers=1){
   }
   const centerY=(minY+maxY)*.5,halfY=(maxY-minY)*.5;
   for(let i=0;i<boundary.length;i++)boundary[i][1]=(boundary[i][1]-centerY)/halfY;
-  const step=Math.max(1.7,scale*1.3/Math.sqrt(wanted));
+  const step=Math.max(minSpacing,scale*1.3/Math.sqrt(wanted));
   const half=scale*.9,rows=Math.ceil(half*2/step);
   for(let row=0;row<=rows;row++){
     const py=-half+row*step,ny=-py/half;
@@ -303,12 +252,12 @@ function orbitalTextTargets(text,cx,cy,radius,tilt,fontSize,band){
 
 function setTargets(shape, snap=false) {
   const isTextShape=shape==="love"||shape==="name"||shape==="particleText";
-  let count=shape==="planet"?Math.round(Math.min(2600,Math.max(1350,width*height/175))*CONFIG.particleScale):shape==="bouquet"?Math.round(Math.min(3000,Math.max(1800,width*height/145))*CONFIG.particleScale):shape==="particleText"?Math.round(Math.min(1600,Math.max(950,width*height/280))*CONFIG.particleScale):Math.round(Math.min(isTextShape?1600:1250,Math.max(isTextShape?850:500,width*height/(isTextShape?360:520)))*CONFIG.particleScale);
+  let count=shape==="planet"?Math.round(Math.min(2600,Math.max(1350,width*height/175))*CONFIG.particleScale):shape==="heartFinal"?Math.round(Math.min(2400,Math.max(1400,width*height/170))*CONFIG.particleScale):shape==="particleText"?Math.round(Math.min(1600,Math.max(950,width*height/280))*CONFIG.particleScale):Math.round(Math.min(isTextShape?1600:1250,Math.max(isTextShape?850:500,width*height/(isTextShape?360:520)))*CONFIG.particleScale);
   targetKind=shape; targets=makeTargets(shape,count);
   if(shape==="particleText"&&targets.length<count)count=targets.length;
   else count=Math.max(count,targets.length);
   heartCenterX=width*.5;heartCenterY=height*.5;heartRadiusX=heartRadiusY=0;
-  if(shape==="love"||shape==="name"){
+  if(shape==="love"||shape==="name"||shape==="heartFinal"){
     let left=Infinity,right=-Infinity,top=Infinity,bottom=-Infinity;
     for(let i=0;i<targets.length;i++)if(targets[i].heart){const t=targets[i];left=Math.min(left,t.x);right=Math.max(right,t.x);top=Math.min(top,t.y);bottom=Math.max(bottom,t.y);}
     if(left<Infinity){heartCenterX=(left+right)*.5;heartCenterY=(top+bottom)*.5;heartRadiusX=(right-left)*.5;heartRadiusY=(bottom-top)*.5;}
@@ -331,7 +280,7 @@ function showScene(index) {
   const stage=document.getElementById("stage");
   stage.classList.toggle("letter-scene",scene.shape==="letter");
   stage.classList.toggle("envelope-scene",scene.shape==="envelope");
-  stage.classList.toggle("bouquet-scene",scene.shape==="bouquet");
+  stage.classList.toggle("heart-final-scene",scene.shape==="heartFinal");
   letterCard.classList.remove("open");
   envelope.hidden=scene.shape!=="envelope";
   envelope.classList.remove("opened");
@@ -454,9 +403,19 @@ function drawRomanticEffects(time){
   ctx.restore();ctx.globalAlpha=1;
 }
 
+function drawHeartAura(time){
+  if(targetKind!=="heartFinal")return;
+  const pulse=1+.045*Math.pow(Math.max(0,Math.sin(time*.0024)),8);
+  const radius=Math.max(heartRadiusX,heartRadiusY)*1.4*pulse;
+  const halo=ctx.createRadialGradient(heartCenterX,heartCenterY,heartRadiusX*.16,heartCenterX,heartCenterY,radius);
+  halo.addColorStop(0,"rgba(255,30,77,.2)");halo.addColorStop(.58,"rgba(241,30,75,.11)");halo.addColorStop(1,"rgba(241,30,75,0)");
+  ctx.fillStyle=halo;ctx.fillRect(heartCenterX-radius,heartCenterY-radius,radius*2,radius*2);
+}
+
 function draw(time) {
   const dt=Math.min(0.034,Math.max(0.001,(time-(lastTime||time))/1000));lastTime=time;frameCount++;
   ctx.clearRect(0,0,width,height);
+  drawHeartAura(time);
   for(let i=0;i<stars.length;i++){const s=stars[i];const a=s.a*(.62+.38*Math.sin(time*.001*s.speed+s.phase));ctx.fillStyle=`rgba(235,222,255,${a})`;ctx.beginPath();ctx.arc(s.x,s.y,s.r,0,6.283);ctx.fill();}
   drawMeteors(time,dt);
   drawScenePulse(time);
@@ -490,15 +449,12 @@ function draw(time) {
       p.ty=height*.49+(lx*Math.sin(tilt)+ly*Math.cos(tilt))*perspective;
     }
     // One time-based spring keeps motion consistent across 30/60/120 Hz screens.
-    const textShape=targetKind==="love"||targetKind==="name"||targetKind==="particleText";
-    const heartBeat=1+.17*Math.pow(Math.max(0,Math.sin(time*.0031)),8)+.025*Math.sin(time*.00155);
+    const textShape=targetKind==="love"||targetKind==="name"||targetKind==="particleText"||targetKind==="heartFinal";
+    const beatWave=Math.sin(time*.0024);
+    const heartBeat=targetKind==="heartFinal"?1+.075*Math.pow(Math.max(0,beatWave),8)+.018*Math.sin(time*.0012):1+.17*Math.pow(Math.max(0,Math.sin(time*.0031)),8)+.025*Math.sin(time*.00155);
     if(textShape){
       ox+=Math.sin(time*.00036)*1.4+Math.sin(time*.00105+p.drift)*.72;
       oy+=Math.cos(time*.00032)*1.1+Math.cos(time*.00088+p.drift)*.62;
-    } else if(targetKind==="bouquet"){
-      const sway=Math.sin(time*.00048+p.drift*.08);
-      ox+=sway*(p.flower?1.35:p.leaf?2.1:.9)+Math.sin(time*.0012+p.phase)*.48;
-      oy+=Math.cos(time*.00042+p.drift*.06)*(p.leaf?1.1:.65)+Math.sin(time*.0009+p.phase)*.35;
     } else {
       const wobble=targetKind==="planet"?.32:.45;
       ox+=Math.sin(time*.00042+p.drift*.12)*wobble;
@@ -524,15 +480,15 @@ function draw(time) {
     const twinkle=textShape?.9+.1*(.5+.5*Math.sin(time*.0015+p.phase*.15)):.78+.22*Math.sin(phase*1.4);const glow=p.hue<.42?CONFIG.colors.pink:p.hue<.72?CONFIG.colors.violet:CONFIG.colors.gold;
     let depthAlpha=1;
     if(targetKind==="planet"&&p.orbitBand!==undefined)depthAlpha=.68+.32*Math.sin(phase*1.3);
-    const textScene=targetKind==="love"||targetKind==="name"||targetKind==="particleText";
+    const textScene=targetKind==="love"||targetKind==="name"||targetKind==="particleText"||targetKind==="heartFinal";
     const headlineParticle=targetKind==="planet"&&p.headline;
     const crispText=textScene||headlineParticle;
     const globePoint=targetKind==="planet"&&p.globe;
     if(globePoint)depthAlpha=.13+.87*Math.max(0,(p.globeDepth+1)*.5);
     ctx.globalAlpha=globePoint?depthAlpha*(.7+.3*twinkle):(crispText?.98:p.alpha)*twinkle*depthAlpha;
-    ctx.fillStyle=targetKind==="bouquet"?(p.color||"#ffd5e7"):globePoint?(p.globeDepth>.48?"#fffaff":p.globeDepth>-.18?"#ffc9f0":"#876aab"):p.heart?(p.hue<.68?"#ff9fcf":"#ffd8eb"):headlineParticle?"#ffffff":textScene?(p.hue<.24?"#fff4f9":p.hue<.5?"#ffd0e4":p.hue<.76?"#fff0c9":"#f5edff"):glow;
+    ctx.fillStyle=targetKind==="heartFinal"?(p.color||"#f52e55"):globePoint?(p.globeDepth>.48?"#fffaff":p.globeDepth>-.18?"#ffc9f0":"#876aab"):p.heart?(p.hue<.68?"#ff9fcf":"#ffd8eb"):headlineParticle?"#ffffff":textScene?(p.hue<.24?"#fff4f9":p.hue<.5?"#ffd0e4":p.hue<.76?"#fff0c9":"#f5edff"):glow;
     ctx.shadowBlur=0;
-    const pointSize=targetKind==="bouquet"?(p.flower?1.65+(p.seed%4)*.13:p.ribbon?1.45:p.spark?1.15:p.r*.95):globePoint?(1.1+(p.globeSeed%7)*.12)*(p.globeDepth>.25?1.08:.82):p.heart?1.25+p.hue*.3:textShape?1.35+(p.hue*.28):p.r*(headlineParticle?1.45:p.halo?.7:1)*(crispText?1.12:(.78+.22*twinkle));
+    const pointSize=targetKind==="heartFinal"?1.45+(p.r*.34)+(p.color==="#ffd7e4"?.35:0):globePoint?(1.1+(p.globeSeed%7)*.12)*(p.globeDepth>.25?1.08:.82):p.heart?1.25+p.hue*.3:textShape?1.35+(p.hue*.28):p.r*(headlineParticle?1.45:p.halo?.7:1)*(crispText?1.12:(.78+.22*twinkle));
     ctx.beginPath();ctx.arc(p.x,p.y,pointSize,0,6.283);ctx.fill();
   }
   ctx.globalAlpha=1;ctx.shadowBlur=0;
