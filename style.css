@@ -97,6 +97,9 @@
 .letter-scene .message h1,
 .letter-scene .signoff{font-family:"Segoe Script","Segoe Print","Comic Sans MS",cursive}
 .letter-scene .message-body{font-family:"Segoe Print","Segoe Script","Comic Sans MS",cursive}
+.letter-scene .message-body strong{font-weight:700;color:#8e3155}
+.letter-scene .message-body em{font-style:italic;color:#785260}
+.letter-scene .signoff{font-size:clamp(15px,3.5vw,21px);line-height:1.45}
 
 /* A quiet ruby glow gives the particle heart room to stand out. */
 .stage.heart-final-scene{background:radial-gradient(ellipse at 50% 50%,rgba(145,15,43,.2),transparent 43%),radial-gradient(ellipse at 50% 52%,#160a16 0,#0d0912 57%,#07070d 100%)}

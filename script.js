@@ -17,7 +17,7 @@ const CONFIG = {
     { eyebrow: "", title: "Anh yêu em", body: "", signoff: "", shape: "love", duration: 4200 },
     { eyebrow: "", title: "Lê Nguyễn Thanh\nVân Anh", body: "", signoff: "", shape: "name", duration: 5200 },
     { eyebrow: "", title: "", body: "", signoff: "", shape: "envelope" },
-    { eyebrow: "", title: "Chúc mừng 20/10", body: "Vân Anh yêu dấu,\n\nChúc em một ngày 20/10 thật hạnh phúc.\nMong em luôn rạng rỡ, bình yên,\nvà được yêu thương thật nhiều —\nhôm nay và mỗi ngày sau đó.\n\nCảm ơn em vì đã làm thế giới của anh\nấm áp và đẹp hơn.", signoff: "Anh yêu em ❤️", shape: "letter" },
+    { eyebrow: "", title: "Dear My Love, 💗", body: "Em đã đọc lá thư tay của anh rồi, em nhỉ? Anh mong rằng khi đọc từng dòng chữ ấy, em có thể cảm nhận được tất cả tình cảm mà anh dành cho em.\n\nTính đến hôm nay, mình đã bên nhau **… ngày** rồi. Không biết từ lúc nào, những điều bình thường trong cuộc sống của anh lại trở nên đặc biệt hơn chỉ vì có em. Anh chẳng mong tình yêu của mình lúc nào cũng phải thật hoàn hảo, chỉ mong dù vui hay buồn, dù những ngày bình yên hay lúc khó khăn, chúng ta vẫn luôn chọn ở lại bên nhau, lắng nghe và yêu thương nhau nhiều hơn một chút.\n\nCảm ơn bé yêu Vân Anh đã đến bên anh, để anh có một người muốn yêu thương, chở che. Anh hy vọng sau này, khi nhìn lại chặng đường đã qua, chúng ta vẫn có thể mỉm cười và nói rằng: *“May mắn thật, vì ngày ấy chúng mình đã gặp được nhau.”*\n\n**Mong rằng không chỉ 20/10 năm nay, mà cả những mùa 20/10 sau này, người được ở bên em, nắm tay em và nói lời yêu em vẫn luôn là anh.** ❤️", signoff: "Happy Vietnamese Women's Day, My Love. 💗", shape: "letter" },
     { title: "", shape: "heartFinal" }
   ]
 };
@@ -338,14 +338,20 @@ function openLetter(){
   envelope.classList.add("opened");
   letterCard.classList.add("open");
   const finalScene=CONFIG.scenes[letterIndex];
+  const plainBody=finalScene.body.replace(/\*\*/g,"").replace(/\*/g,"");
   let i=0;
   bodyEl.textContent="";bodyEl.classList.add("visible");signoffEl.textContent="";signoffEl.classList.add("visible");
   const typeNext=()=>{
-    if(i>=finalScene.body.length){signoffEl.textContent=finalScene.signoff;advanceTimer=setTimeout(()=>showScene(CONFIG.scenes.length-1),4200);return;}
-    bodyEl.textContent=finalScene.body.slice(0,++i);
-    typingTimer=setTimeout(typeNext,finalScene.body[i-1]==="\n"?320:48);
+    if(i>=plainBody.length){bodyEl.innerHTML=formatLetterText(finalScene.body);signoffEl.textContent=finalScene.signoff;advanceTimer=setTimeout(()=>showScene(CONFIG.scenes.length-1),4200);return;}
+    bodyEl.textContent=plainBody.slice(0,++i);
+    typingTimer=setTimeout(typeNext,plainBody[i-1]==="\n"?320:48);
   };
   setTimeout(typeNext,1000);
+}
+
+function formatLetterText(text){
+  const escapeHtml=value=>value.replace(/[&<>"']/g,char=>({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"}[char]));
+  return escapeHtml(text).replace(/\*\*(.+?)\*\*/g,"<strong>$1</strong>").replace(/\*(.+?)\*/g,"<em>$1</em>").replace(/\n/g,"<br>");
 }
 function drawPlanet(time) {
   if(targetKind!=="planet") return;
