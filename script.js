@@ -6,6 +6,7 @@ const CONFIG = {
   particleScale: 1,
   maxDpr: 1.35,
   autoAdvanceMs: 7200,
+  relationshipStart: Date.UTC(2026, 5, 9, 17, 0, 0), // 10/06/2026 00:00:00, Vietnam time
   scenes: [
     { title: "", shape: "planet", duration: 9000 },
     { title: "", shape: "particleText", lines: ["3"], fontScale: .18, duration: 1800 },
@@ -17,7 +18,7 @@ const CONFIG = {
     { eyebrow: "", title: "Anh yêu em", body: "", signoff: "", shape: "love", duration: 4200 },
     { eyebrow: "", title: "Lê Nguyễn Thanh\nVân Anh", body: "", signoff: "", shape: "name", duration: 5200 },
     { eyebrow: "", title: "", body: "", signoff: "", shape: "envelope" },
-    { eyebrow: "", title: "Dear My Love, 💗", body: "Em đã đọc lá thư tay của anh rồi, em nhỉ? Anh mong rằng khi đọc từng dòng chữ ấy, em có thể cảm nhận được tất cả tình cảm mà anh dành cho em.\n\nTính đến hôm nay, mình đã bên nhau **… ngày** rồi. Không biết từ lúc nào, những điều bình thường trong cuộc sống của anh lại trở nên đặc biệt hơn chỉ vì có em. Anh chẳng mong tình yêu của mình lúc nào cũng phải thật hoàn hảo, chỉ mong dù vui hay buồn, dù những ngày bình yên hay lúc khó khăn, chúng ta vẫn luôn chọn ở lại bên nhau, lắng nghe và yêu thương nhau nhiều hơn một chút.\n\nCảm ơn bé yêu Vân Anh đã đến bên anh, để anh có một người muốn yêu thương, chở che. Anh hy vọng sau này, khi nhìn lại chặng đường đã qua, chúng ta vẫn có thể mỉm cười và nói rằng: *“May mắn thật, vì ngày ấy chúng mình đã gặp được nhau.”*\n\n**Mong rằng không chỉ 20/10 năm nay, mà cả những mùa 20/10 sau này, người được ở bên em, nắm tay em và nói lời yêu em vẫn luôn là anh.** ❤️", signoff: "Happy Vietnamese Women's Day, My Love. 💗", shape: "letter" },
+    { eyebrow: "", title: "Dear My Love, 💗", body: "Em đã đọc lá thư tay của anh rồi, em nhỉ? Anh mong rằng khi đọc từng dòng chữ ấy, em có thể cảm nhận được tất cả tình cảm mà anh dành cho em.\n\nTính đến **{{TIMESTAMP}}**, mình đã bên nhau **{{DURATION}}** rồi. Không biết từ lúc nào, những điều bình thường trong cuộc sống của anh lại trở nên đặc biệt hơn chỉ vì có em. Anh chẳng mong tình yêu của mình lúc nào cũng phải thật hoàn hảo, chỉ mong dù vui hay buồn, dù những ngày bình yên hay lúc khó khăn, chúng ta vẫn luôn chọn ở lại bên nhau, lắng nghe và yêu thương nhau nhiều hơn một chút.\n\nCảm ơn bé yêu Vân Anh đã đến bên anh, để anh có một người muốn yêu thương, chở che. Anh hy vọng sau này, khi nhìn lại chặng đường đã qua, chúng ta vẫn có thể mỉm cười và nói rằng: *“May mắn thật, vì ngày ấy chúng mình đã gặp được nhau.”*\n\n**Mong rằng không chỉ 20/10 năm nay, mà cả những mùa 20/10 sau này, người được ở bên em, nắm tay em và nói lời yêu em vẫn luôn là anh.** ❤️", signoff: "Happy Vietnamese Women's Day, My Love. 💗", shape: "letter" },
     { title: "", shape: "heartFinal" }
   ]
 };
@@ -42,12 +43,34 @@ const meteors = [];
 let width = 0, height = 0, dpr = 1, sceneIndex = 0, sceneStarted = 0, lastTime = 0;
 let targets = [], targetKind = "orbit", pointerWave = 0, waveX = 0, waveY = 0, frameCount = 0;
 let heartCenterX = 0, heartCenterY = 0, heartRadiusX = 0, heartRadiusY = 0;
-let advanceTimer = 0, resizeTimer = 0, typingTimer = 0, ambientHeartTimer = 0, opened = false;
+let advanceTimer = 0, resizeTimer = 0, typingTimer = 0, ambientHeartTimer = 0, relationshipTimer = 0, opened = false;
 let photoTimer = 0, photoRun = 0, photoFiles = [], photoOrder = [], photoCursor = 0;
 
 function stopMemoryPhotos(){
   clearTimeout(photoTimer);photoRun++;photoCursor=0;photoOrder.length=0;
   memoryPhotos.replaceChildren();
+}
+
+function vietnamTimestamp(now){
+  const values={};
+  new Intl.DateTimeFormat("en-GB",{timeZone:"Asia/Ho_Chi_Minh",day:"2-digit",month:"2-digit",year:"numeric",hour:"2-digit",minute:"2-digit",second:"2-digit",hourCycle:"h23"})
+    .formatToParts(now).forEach(part=>{if(part.type!=="literal")values[part.type]=part.value;});
+  return `${values.day}/${values.month}/${values.year} ${values.hour}:${values.minute}:${values.second}`;
+}
+
+function relationshipDuration(now){
+  let seconds=Math.max(0,Math.floor((now-CONFIG.relationshipStart)/1000));
+  const days=Math.floor(seconds/86400);seconds%=86400;
+  const hours=Math.floor(seconds/3600);seconds%=3600;
+  const minutes=Math.floor(seconds/60);seconds%=60;
+  const pad=value=>String(value).padStart(2,"0");
+  return `${pad(days)} ngày ${pad(hours)} giờ ${pad(minutes)} phút ${pad(seconds)} giây`;
+}
+
+function updateRelationshipClock(){
+  const now=Date.now(),stamp=bodyEl.querySelector("#letterTimestamp"),duration=bodyEl.querySelector("#relationshipDuration");
+  if(stamp)stamp.textContent=vietnamTimestamp(now);
+  if(duration)duration.textContent=relationshipDuration(now);
 }
 
 function startMemoryPhotos(){
@@ -309,6 +332,7 @@ function setTargets(shape, snap=false) {
 function showScene(index) {
   sceneIndex=Math.max(0,Math.min(index,CONFIG.scenes.length-1));
   const scene=CONFIG.scenes[sceneIndex];
+  clearInterval(relationshipTimer);relationshipTimer=0;
   stopMemoryPhotos();
   [titleEl,bodyEl,eyebrowEl,signoffEl].forEach(el=>el.classList.remove("visible"));
   const stage=document.getElementById("stage");
@@ -338,12 +362,16 @@ function openLetter(){
   envelope.classList.add("opened");
   letterCard.classList.add("open");
   const finalScene=CONFIG.scenes[letterIndex];
-  const plainBody=finalScene.body.replace(/\*\*/g,"").replace(/\*/g,"");
+  const now=Date.now();
+  const initialTimestamp=vietnamTimestamp(now),initialDuration=relationshipDuration(now);
+  const typedBody=finalScene.body.replace("{{TIMESTAMP}}",initialTimestamp).replace("{{DURATION}}",initialDuration);
+  const plainBody=typedBody.replace(/\*\*/g,"").replace(/\*/g,"");
   let i=0;
   bodyEl.textContent="";bodyEl.classList.add("visible");signoffEl.textContent="";signoffEl.classList.add("visible");
   const typeNext=()=>{
-    if(i>=plainBody.length){bodyEl.innerHTML=formatLetterText(finalScene.body);signoffEl.textContent=finalScene.signoff;advanceTimer=setTimeout(()=>showScene(CONFIG.scenes.length-1),4200);return;}
-    bodyEl.textContent=plainBody.slice(0,++i);
+    if(i>=plainBody.length){bodyEl.innerHTML=formatLetterText(finalScene.body);signoffEl.textContent=finalScene.signoff;updateRelationshipClock();relationshipTimer=setInterval(updateRelationshipClock,1000);advanceTimer=setTimeout(()=>showScene(CONFIG.scenes.length-1),15000);return;}
+    const visibleText=plainBody.slice(0,++i),current=Date.now();
+    bodyEl.textContent=visibleText.replace(initialTimestamp,vietnamTimestamp(current)).replace(initialDuration,relationshipDuration(current));
     typingTimer=setTimeout(typeNext,plainBody[i-1]==="\n"?320:48);
   };
   setTimeout(typeNext,1000);
@@ -351,7 +379,7 @@ function openLetter(){
 
 function formatLetterText(text){
   const escapeHtml=value=>value.replace(/[&<>"']/g,char=>({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"}[char]));
-  return escapeHtml(text).replace(/\*\*(.+?)\*\*/g,"<strong>$1</strong>").replace(/\*(.+?)\*/g,"<em>$1</em>").replace(/\n/g,"<br>");
+  return escapeHtml(text).replace("{{TIMESTAMP}}",'<time id="letterTimestamp"></time>').replace("{{DURATION}}",'<span id="relationshipDuration"></span>').replace(/\*\*(.+?)\*\*/g,"<strong>$1</strong>").replace(/\*(.+?)\*/g,"<em>$1</em>").replace(/\n/g,"<br>");
 }
 function drawPlanet(time) {
   if(targetKind!=="planet") return;
