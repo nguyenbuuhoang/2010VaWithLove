@@ -89,19 +89,24 @@ function startMemoryPhotos(){
       photoOrder=photoFiles.slice();
       for(let i=photoOrder.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[photoOrder[i],photoOrder[j]]=[photoOrder[j],photoOrder[i]];}
       photoCursor=0;
-      const positions=[[-36,-23],[36,-24],[-40,8],[40,8],[-29,29],[29,30],[0,-38],[0,39]];
+      const positions=[[-35,-27],[35,-27],[-39,0],[39,0],[-31,28],[31,28],[-14,-39],[14,-39],[-14,39],[14,39]];
       const release=()=>{
         if(run!==photoRun||targetKind!=="heartFinal")return;
         if(photoCursor>=photoOrder.length){photoOrder=photoFiles.slice();for(let i=photoOrder.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[photoOrder[i],photoOrder[j]]=[photoOrder[j],photoOrder[i]];}photoCursor=0;}
         const file=photoOrder[photoCursor++],slot=(photoCursor-1)%positions.length,pos=positions[slot];
+        const active=memoryPhotos.querySelectorAll(".memory-photo:not(.retiring)");
+        if(active.length>=10){
+          const oldest=active[0];oldest.classList.add("retiring");
+          setTimeout(()=>oldest.remove(),1900);
+        }
         const card=document.createElement("div"),img=document.createElement("img");
         card.className="memory-photo";card.style.setProperty("--dx",pos[0]+"vw");card.style.setProperty("--dy",pos[1]+"vh");
         card.style.setProperty("--tilt",(slot%2?"":"-")+((slot*3)%9+3)+"deg");
-        card.style.setProperty("--flight",(7.2+(slot%3)*.6)+"s");
+        card.classList.add("arriving");
         img.src="image/"+encodeURIComponent(file);img.alt="";img.draggable=false;
         img.onerror=()=>card.remove();card.appendChild(img);memoryPhotos.appendChild(card);
-        card.addEventListener("animationend",()=>card.remove(),{once:true});
-        photoTimer=setTimeout(release,1450+Math.random()*650);
+        card.addEventListener("animationend",()=>card.classList.remove("arriving"),{once:true});
+        photoTimer=setTimeout(release,1050);
       };
       photoTimer=setTimeout(release,1800);
     })
