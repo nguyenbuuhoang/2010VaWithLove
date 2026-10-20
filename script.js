@@ -326,14 +326,14 @@ function showScene(index) {
   sceneIndex=Math.max(0,Math.min(index,CONFIG.scenes.length-1));
   const scene=CONFIG.scenes[sceneIndex];
   clearInterval(relationshipTimer);relationshipTimer=0;
-  continueLetter.hidden=true;continueLetter.classList.remove("visible");
+  continueLetter.hidden=true;continueLetter.disabled=false;continueLetter.classList.remove("visible");
   stopMemoryPhotos();
   [titleEl,bodyEl,eyebrowEl,signoffEl].forEach(el=>el.classList.remove("visible"));
   const stage=document.getElementById("stage");
   stage.classList.toggle("letter-scene",scene.shape==="letter");
   stage.classList.toggle("envelope-scene",scene.shape==="envelope");
   stage.classList.toggle("heart-final-scene",scene.shape==="heartFinal");
-  letterCard.classList.remove("open");
+  letterCard.classList.remove("open","leaving");
   envelope.hidden=scene.shape!=="envelope";
   envelope.classList.remove("opened");
   titleEl.textContent=scene.title; bodyEl.textContent=""; eyebrowEl.textContent=scene.eyebrow; signoffEl.textContent="";
@@ -570,7 +570,12 @@ function draw(time) {
 
 document.getElementById("stage").addEventListener("pointerdown",e=>burst(e.clientX,e.clientY));
 envelope.addEventListener("click",openLetter);
-continueLetter.addEventListener("click",()=>showScene(CONFIG.scenes.length-1));
+continueLetter.addEventListener("click",()=>{
+  if(continueLetter.disabled)return;
+  continueLetter.disabled=true;
+  letterCard.classList.add("leaving");
+  setTimeout(()=>showScene(CONFIG.scenes.length-1),900);
+});
 window.addEventListener("resize",()=>{clearTimeout(resizeTimer);resizeTimer=setTimeout(resize,120);});
 resize();
 showScene(0);
