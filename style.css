@@ -156,8 +156,11 @@
 @media(max-height:700px){.letter-scene .letter-card{padding:clamp(9px,2svh,15px) clamp(14px,3.5vw,22px)}.letter-scene .message-body{line-height:1.3}.letter-scene .signoff{margin-top:6px}.letter-scene .continue-letter{margin-top:6px;padding:7px 12px}}
 @media(max-height:540px){.letter-scene .message h1{font-size:clamp(20px,min(5.5vw,4svh),28px)}.letter-scene .message-body{font-size:clamp(12px,min(3.2vw,2.2svh),14px);line-height:1.22}.letter-scene .signoff{font-size:15px}.letter-scene .continue-letter{font-size:10px;padding:5px 10px}}
 
-/* A more personal, editorial 20/10 finish: warm paper and quiet gold details. */
-.stage.envelope-scene{background:radial-gradient(ellipse at 50% 52%,rgba(181,35,102,.2),transparent 38%),radial-gradient(ellipse at 50% 48%,#1c0a19 0,#100914 57%,#07070d 100%)}
+/* A more personal, editorial 20/10 finish: warm paper, quiet gold details,
+   and readable letter copy with handwriting reserved for the greeting. */
+.stage.envelope-scene{background:
+  radial-gradient(ellipse at 50% 52%,rgba(181,35,102,.2),transparent 38%),
+  radial-gradient(ellipse at 50% 48%,#1c0a19 0,#100914 57%,#07070d 100%)}
 .envelope{width:min(66vw,330px);height:min(40vw,212px);min-height:176px;filter:drop-shadow(0 22px 48px rgba(0,0,0,.42)) drop-shadow(0 0 34px rgba(236,70,149,.17));animation:envelope-arrive 1.5s cubic-bezier(.18,.76,.2,1) both}
 .envelope::before,.envelope::after{display:none}
 .envelope-back{inset:40% 0 0;border:1px solid rgba(255,210,228,.58);border-radius:8px;background:linear-gradient(145deg,#ed6ca8 0%,#c32f79 56%,#8e1e5b 100%);box-shadow:inset 0 1px 0 rgba(255,255,255,.36),inset 0 -18px 30px rgba(80,10,47,.13),0 12px 36px rgba(195,47,121,.2)}
@@ -167,6 +170,7 @@
 .envelope-caption{bottom:-19%;font-size:10px;letter-spacing:.2em;color:#ffe8f2;text-shadow:0 2px 16px rgba(255,160,205,.3)}
 .envelope-heart{display:grid;place-items:center;top:68%;left:50%;width:34px;height:34px;border:1px solid rgba(255,235,220,.75);border-radius:50%;background:radial-gradient(circle at 35% 28%,#fff1dd,#e7bd9e 48%,#bd7a70);color:#a42e61;font-size:15px;opacity:1;text-shadow:0 1px 0 rgba(255,255,255,.7);box-shadow:0 3px 12px rgba(81,14,53,.3)}
 .envelope.opened .envelope-heart{opacity:0}
+.envelope:hover{filter:drop-shadow(0 24px 50px rgba(0,0,0,.4)) drop-shadow(0 0 40px rgba(255,99,174,.28))}
 .letter-scene .letter-card{border:1px solid rgba(190,145,115,.52);border-radius:17px;background:radial-gradient(ellipse at 0 0,rgba(255,255,255,.96),transparent 54%),linear-gradient(150deg,#fffefa 0%,#fff8f1 66%,#f8e8ed 100%);box-shadow:0 30px 100px rgba(0,0,0,.4),0 0 0 1px rgba(255,238,230,.12),0 0 54px rgba(255,158,195,.16),inset 0 1px 0 #fff}
 .letter-scene .letter-card::before{inset:9px;border:1px solid rgba(190,145,115,.26);border-radius:11px}
 .letter-scene .message h1,.letter-scene .signoff{font-family:"Dancing Script","Playfair Display",cursive}
@@ -176,12 +180,19 @@
 .letter-scene .message-body em{color:#86546a}
 .letter-scene .signoff{font-size:clamp(20px,4.8vw,27px);color:#a4426d}
 .continue-letter{border-color:rgba(166,82,117,.3);background:linear-gradient(135deg,#fffdfa,#fae8ee);box-shadow:0 7px 20px rgba(143,62,100,.13)}
-@media(max-width:560px){.envelope{width:min(76vw,290px);height:190px;min-height:190px}.envelope-caption{bottom:-16%;font-size:9px;letter-spacing:.16em}.letter-scene .message{width:calc(100vw - 30px)}.letter-scene .letter-card{padding:clamp(13px,2.1svh,18px) 18px;border-radius:14px}.letter-scene .letter-card::before{inset:7px;border-radius:9px}.letter-scene .message h1{font-size:clamp(31px,8vw,38px)}.letter-scene .message-body{font-size:clamp(12px,min(3.5vw,1.75svh),14px);line-height:1.52;margin-top:8px}.letter-scene .signoff{font-size:22px;margin-top:8px}}
-@media(max-height:620px){.letter-scene .letter-card{padding-top:10px;padding-bottom:10px}.letter-scene .message h1{font-size:clamp(24px,5.8vw,32px)}.letter-scene .message-body{line-height:1.34}.letter-scene .signoff{font-size:19px}}
-
-.finale-note[hidden]{display:none}
-.finale-note{position:absolute;z-index:3;top:clamp(40px,7.2svh,78px);left:50%;width:max-content;max-width:calc(100vw - 28px);margin:0;transform:translate(-50%,8px);text-align:center;font-family:"Dancing Script","Playfair Display",cursive;font-size:clamp(21px,5.5vw,32px);font-weight:700;line-height:1.25;letter-spacing:.01em;color:#ffe3ee;text-shadow:0 0 12px rgba(255,106,158,.62),0 2px 24px rgba(0,0,0,.68);animation:finale-arrive 1.7s cubic-bezier(.18,.72,.2,1) both;pointer-events:none}
-.finale-note::after{content:"";display:block;width:38%;height:1px;margin:8px auto 0;background:linear-gradient(90deg,transparent,rgba(255,211,230,.72),transparent);box-shadow:0 0 10px rgba(255,143,190,.5)}
-@keyframes finale-arrive{from{opacity:0;transform:translate(-50%,12px);filter:blur(7px)}to{opacity:1;transform:translate(-50%,0);filter:blur(0)}}
-@media(max-height:560px){.finale-note{top:40px;font-size:clamp(19px,4vw,25px)}}
-@media(prefers-reduced-motion:reduce){.finale-note{animation:none;transform:translate(-50%,0)}}
+@media(max-width:560px){
+  .envelope{width:min(76vw,290px);height:190px;min-height:190px}
+  .envelope-caption{bottom:-16%;font-size:9px;letter-spacing:.16em}
+  .letter-scene .message{width:calc(100vw - 30px)}
+  .letter-scene .letter-card{padding:clamp(13px,2.1svh,18px) 18px;border-radius:14px}
+  .letter-scene .letter-card::before{inset:7px;border-radius:9px}
+  .letter-scene .message h1{font-size:clamp(31px,8vw,38px)}
+  .letter-scene .message-body{font-size:clamp(12px,min(3.5vw,1.75svh),14px);line-height:1.52;margin-top:8px}
+  .letter-scene .signoff{font-size:22px;margin-top:8px}
+}
+@media(max-height:620px){
+  .letter-scene .letter-card{padding-top:10px;padding-bottom:10px}
+  .letter-scene .message h1{font-size:clamp(24px,5.8vw,32px)}
+  .letter-scene .message-body{line-height:1.34}
+  .letter-scene .signoff{font-size:19px}
+}
