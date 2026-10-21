@@ -45,7 +45,7 @@ const meteors = [];
 let width = 0, height = 0, dpr = 1, sceneIndex = 0, sceneStarted = 0, lastTime = 0;
 let targets = [], targetKind = "orbit", pointerWave = 0, waveX = 0, waveY = 0;
 let heartCenterX = 0, heartCenterY = 0, heartRadiusX = 0, heartRadiusY = 0;
-let advanceTimer = 0, resizeTimer = 0, typingTimer = 0, ambientHeartTimer = 0, relationshipTimer = 0, opened = false;
+let advanceTimer = 0, resizeTimer = 0, typingTimer = 0, ambientHeartTimer = 0, relationshipTimer = 0, finaleTimer = 0, opened = false;
 let photoTimer = 0, photoRun = 0, photoFiles = [], photoOrder = [], photoCursor = 0;
 let heartDissolveAt = 0, heartDissolveTimer = 0;
 let photoReturnFocus = null;
@@ -355,6 +355,8 @@ function showScene(index) {
   clearTimeout(heartDissolveTimer);heartDissolveTimer=0;
   heartDissolveAt=0;
   clearInterval(relationshipTimer);relationshipTimer=0;
+  clearTimeout(finaleTimer);finaleTimer=0;
+  document.getElementById("finaleNote").hidden=true;
   continueLetter.hidden=true;continueLetter.disabled=false;continueLetter.classList.remove("visible");
   stopMemoryPhotos();
   hearts.length=0;
@@ -368,7 +370,12 @@ function showScene(index) {
   envelope.classList.remove("opened");
   titleEl.textContent=scene.title; bodyEl.textContent=""; eyebrowEl.textContent=scene.eyebrow||""; signoffEl.textContent="";
   setTargets(scene.shape,reducedMotion);
-  if(scene.shape==="heartFinal")startMemoryPhotos();
+  if(scene.shape==="heartFinal"){
+    startMemoryPhotos();
+    finaleTimer=setTimeout(()=>{
+      if(targetKind==="heartFinal")document.getElementById("finaleNote").hidden=false;
+    },11800);
+  }
   sceneStarted=performance.now();
   clearTimeout(advanceTimer);
   if(reducedMotion)requestAnimationFrame(draw);
