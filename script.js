@@ -628,4 +628,9 @@ continueLetter.addEventListener("click",()=>{
 window.addEventListener("resize",()=>{clearTimeout(resizeTimer);resizeTimer=setTimeout(resize,120);});
 resize();
 showScene(0);
+// Text targets are sampled from canvas. Rebuild them after the web fonts load so
+// Vietnamese glyphs and line widths match the visible typography on every device.
+document.fonts?.ready.then(()=>{
+  if(width&&height)setTargets(CONFIG.scenes[sceneIndex].shape,false);
+});
 if(!reducedMotion)requestAnimationFrame(draw);
